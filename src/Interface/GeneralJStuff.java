@@ -44,7 +44,7 @@ public class GeneralJStuff {
 
     }
 
-    static JScrollPane createScrollBar(Container pane){
+    static JScrollPane createScrollPane(Container pane, int x, int y, int width, int height){
         JScrollPane component;
         String[] colName = new String[]{"Product Name", "Price"};
         Object[][] products = new Object[][]{
@@ -57,7 +57,8 @@ public class GeneralJStuff {
         JTable table = new JTable(products, colName);
 
         component = new JScrollPane(table);
-        pane.add(new JScrollPane(table));
+        component.setBounds(x, y, width, height);
+        pane.add(component);
         return component;
     }
 

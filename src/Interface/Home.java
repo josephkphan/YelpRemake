@@ -52,18 +52,6 @@ public class Home extends JFrame implements ActionListener {
             options
      */
 
-
-    private Map<String, JTable> tables;
-    /*  List of Scroll Panes:
-            services
-            categories
-            options
-     */
-
-
-
-    private ArrayList<JCheckBox> cb_services, cb_categories, cb_options;
-
     /*  Description
         Services -- far left column i.e. Restaurants, Sports
         Categories -- middle column i.e. Mexican, Asian
@@ -74,9 +62,11 @@ public class Home extends JFrame implements ActionListener {
     private String[] string_days_of_week = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
     private String[] string_hours_of_day =
-        {   "12:00AM", "1:00AM", "2:00AM", "3:00AM", "4:00AM", "5:00AM", "6:00AM", "7:00AM", "8:00AM", "9:00AM", "10:00AM", "11:00AM",
-            "12:00PM", "1:00PM", "2:00PM", "3:00PM", "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM"
-        };
+            {"12:00AM", "1:00AM", "2:00AM", "3:00AM", "4:00AM", "5:00AM", "6:00AM", "7:00AM", "8:00AM", "9:00AM", "10:00AM", "11:00AM",
+                    "12:00PM", "1:00PM", "2:00PM", "3:00PM", "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM"
+            };
+
+
     public Home() {
 
         //Gui Stuff
@@ -92,29 +82,58 @@ public class Home extends JFrame implements ActionListener {
         pane.setLayout(null);
 
 
-
         //Initialize Components
-        buttons =new HashMap<>();
-        labels =new HashMap<>();
-        drop_downs =new HashMap<>();
-        buttons =new HashMap<>();
-        scroll_panes =new HashMap<>();
-        tables =new HashMap<>();
+        buttons = new HashMap<>();
+        labels = new HashMap<>();
+        drop_downs = new HashMap<>();
+        buttons = new HashMap<>();
+        scroll_panes = new HashMap<>();
 
-        cb_services = new ArrayList<>();
-        cb_categories = new ArrayList<>();
-        cb_options = new ArrayList<>();
+        createLabels();
+        createButtons();
+        createDropDowns();
+        createScrollPanes();
 
+    }
 
-        GridBagConstraints c = new GridBagConstraints();
-
+    /**
+     *
+     */
+    public void createLabels() {
         // Creating Labels
-        labels.put("day_of_week",GeneralJStuff.createLabel(pane,"Day of the Week", 50,500));
-        labels.put("start_time",GeneralJStuff.createLabel(pane,"From:", 250,500));
-        labels.put("end_time",GeneralJStuff.createLabel(pane,"To:", 400,500));
-        labels.put("attributes",GeneralJStuff.createLabel(pane,"Search For:", 550,500));
+        labels.put("title", GeneralJStuff.createLabel(pane, "Yelp System", 475, 10));
+        labels.put("day_of_week", GeneralJStuff.createLabel(pane, "Day of the Week", 50, 500));
+        labels.put("start_time", GeneralJStuff.createLabel(pane, "From:", 200, 500));
+        labels.put("end_time", GeneralJStuff.createLabel(pane, "To:", 350, 500));
+        labels.put("attributes", GeneralJStuff.createLabel(pane, "Search For:", 500, 500));
 
+    }
 
+    /**
+     *
+     */
+    public void createButtons() {
+        Runnable r4 = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+            }
+        };
+        Runnable r5 = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+            }
+        };
+
+        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 700, 500, 100, 25, r4));
+        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 850, 500, 100, 25, r5));
+    }
+
+    /**
+     *
+     */
+    public void createDropDowns() {
         // Creating Drop Downs
         Runnable r0 = new Runnable() {
             @Override
@@ -141,27 +160,21 @@ public class Home extends JFrame implements ActionListener {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
             }
         };
-        drop_downs.put("day_of_week",GeneralJStuff.createDropDown(pane,string_days_of_week,50,500,100,100,r0));
-        drop_downs.put("start_time",GeneralJStuff.createDropDown(pane,string_hours_of_day,250,500,100,100,r1));
-        drop_downs.put("end_time",GeneralJStuff.createDropDown(pane,string_hours_of_day,400,500,100,100,r2));
-        drop_downs.put("attributes",GeneralJStuff.createDropDown(pane,string_hours_of_day,550,500,100,100,r3));
+        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r0));
+        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 200, 500, 100, 100, r1));
+        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 350, 500, 100, 100, r2));
+        drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, string_hours_of_day, 500, 500, 100, 100, r3));
 
-        Runnable r4 = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
-            }
-        };
-        Runnable r5 = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
-            }
-        };
+    }
 
-        buttons.put("search",GeneralJStuff.createButton(pane,"Search",700, 500, 100, 25,r4 ));
-        buttons.put("close",GeneralJStuff.createButton(pane,"Close",850, 500, 100, 25,r5 ));
-
+    /**
+     *
+     */
+    public void createScrollPanes() {
+        scroll_panes.put("service", GeneralJStuff.createScrollPane(pane, 50, 50, 145, 400));
+        scroll_panes.put("category", GeneralJStuff.createScrollPane(pane, 200, 50, 145, 400));
+        scroll_panes.put("options", GeneralJStuff.createScrollPane(pane, 350, 50, 145, 400));
+        scroll_panes.put("results", GeneralJStuff.createScrollPane(pane, 500, 50, 450, 400));
     }
 
 
