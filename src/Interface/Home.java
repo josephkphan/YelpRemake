@@ -66,6 +66,24 @@ public class Home extends JFrame implements ActionListener {
                     "12:00PM", "1:00PM", "2:00PM", "3:00PM", "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM"
             };
 
+    private String[] main_business_categories = {
+      "Active Life", "Arts & Entertainment", "Automotive", "Car Rental", "Cafe",
+            "Beauty & Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
+            "Department Stores", "Education", "Event Planning & Services", "Flowers & Gifts",
+            "Food", "Health & Medical", "Home Services", "Home & Garden", "Hospitals", "Hotels & Travel",
+            "Hardware Stores", "Grocery", "medical Centers", "Nurseries & Gardening", "Nightlife",
+            "Restaurants", "Shopping", "Transportation"
+    };
+
+    private String[] result_columns = {"Business", "City", "State", "Stars"};
+
+    Object[][] test_data = new Object[][]{
+            {"R1", "San Jose","CA","3"},
+            {"R2", "San Jose","CA","4"},
+            {"R3", "San Jose","CA","5"}
+    };
+
+
 
     public Home() {
 
@@ -171,10 +189,10 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createScrollPanes() {
-        scroll_panes.put("service", GeneralJStuff.createScrollPane(pane, 50, 50, 145, 400));
-        scroll_panes.put("category", GeneralJStuff.createScrollPane(pane, 200, 50, 145, 400));
-        scroll_panes.put("options", GeneralJStuff.createScrollPane(pane, 350, 50, 145, 400));
-        scroll_panes.put("results", GeneralJStuff.createScrollPane(pane, 500, 50, 450, 400));
+        scroll_panes.put("categories", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 50, 50, 145, 400));
+        scroll_panes.put("service", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 200, 50, 145, 400));
+        scroll_panes.put("options", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 350, 50, 145, 400));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane,result_columns,test_data, 500, 50, 450, 400));
     }
 
 
