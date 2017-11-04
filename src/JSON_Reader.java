@@ -205,4 +205,75 @@ public class JSON_Reader {
         System.out.println(insert_string);
         return insert_string;
     }
+
+
+    private String insert_to_business(JSONObject entry) {
+
+        List<String> fields = Arrays.asList("user_id", "name", "yelping_since", "average_stars", "review_count", "type", "fans");
+        List<String> hours_fields = Arrays.asList("mon_open", "mon_close", "tue_open", "tue_close", "wed_open", "wed_close", "thu_open",
+                "thu_close","fri_open","fri_close","sat_open","sat_close", "sun_open", "sun_close");
+
+        JSONObject hours = (JSONObject) entry.get("hours");
+        JSONObject[] day_of_week = new JSONObject[7];
+        day_of_week[0] = (JSONObject) hours.get("Monday");
+        day_of_week[1] = (JSONObject) hours.get("Tuesday");
+        day_of_week[2] = (JSONObject) hours.get("Wednesday");
+        day_of_week[3] = (JSONObject) hours.get("Thursday");
+        day_of_week[4] = (JSONObject) hours.get("Friday");
+        day_of_week[5] = (JSONObject) hours.get("Saturday"); //TODO CHECK IF THERES ARE THERE?
+        day_of_week[6] = (JSONObject) hours.get("Sunday");
+
+
+        List<String> attributes;    //TODO IMPLEMENT THESE
+        List<String> categories;    //TODO IMPLEMENT THESE
+
+        String[] fields_result = new String[fields.size()];
+        ArrayList<String> hour_fields_result = new ArrayList<>();
+
+        for(int i=0; i<fields.size(); i++){
+            fields_result[i] = entry.get(fields.get(i)).toString();
+        }
+
+        for(int i=0; i<day_of_week.length; i++){
+            //TODO CHECK FOR EXCEPTIONS
+            hour_fields_result.add((day_of_week[i].get("open").toString()));
+            hour_fields_result.add((day_of_week[i].get("close").toString()));
+        }
+
+
+        String insert_string = "INSERT INTO User VALUES(";
+        //business_id
+        insert_string += add_quotes(fields_result[fields.indexOf("user_id")]);
+        insert_string += ",";
+        //name
+        insert_string += add_quotes(fields_result[fields.indexOf("name")]);
+        insert_string += ",";
+        //full_address
+        insert_string += add_quotes(fields_result[fields.indexOf("full_address")]);
+        insert_string += ",";
+        //longitude
+        insert_string += add_quotes(fields_result[fields.indexOf("longitude")]); //TODO SHOULD THIS BE QUOTED? IS THIS VARCHAR OR INT?
+        insert_string += ",";
+        //latitude
+        insert_string += fields_result[fields.indexOf("latitude")];
+        insert_string += ",";
+        //review_count
+        insert_string += add_quotes(fields_result[fields.indexOf("review_count")]);
+        insert_string += ",";
+        //stars
+        insert_string += fields_result[fields.indexOf("stars")];
+        insert_string += ",";
+        //type
+        insert_string += add_quotes(fields_result[fields.indexOf("type")]);
+        insert_string += ",";
+        //open
+        insert_string += fields_result[fields.indexOf("open")];
+        insert_string += ",";
+
+
+        insert_string += ",";
+        insert_string += ");";
+        System.out.println(insert_string);
+        return insert_string;
+    }
 }

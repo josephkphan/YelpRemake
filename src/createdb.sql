@@ -41,9 +41,9 @@ CREATE TABLE Business (
     full_address VARCHAR(255),
     longitude VARCHAR (255),
     latitude VARCHAR(255),
-    review_count VARCHAR(255),
+    review_count INTEGER,
     stars VARCHAR(255),
-    type INTEGER,
+    type VARCHAR(255),
     open VARCHAR(255)
 );
 
