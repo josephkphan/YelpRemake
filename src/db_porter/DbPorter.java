@@ -1,4 +1,4 @@
-package com.jphan.db_porter;
+package db_porter;
 
 public class DbPorter {
 

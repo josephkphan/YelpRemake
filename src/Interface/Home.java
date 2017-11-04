@@ -58,7 +58,7 @@ public class Home extends JFrame implements ActionListener {
         Optioms -- right column i.e. price range
      */
 
-
+    //TODO THESE STRINGS SHOULD BE CREATED DYNAMICALLY
     private String[] string_days_of_week = {"N/A","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
     private String[] string_hours_of_day =

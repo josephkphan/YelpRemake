@@ -1,0 +1,1 @@
+SELECT tablespace_name, table_name from user_tables;
