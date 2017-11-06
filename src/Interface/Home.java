@@ -134,13 +134,13 @@ public class Home extends JFrame implements ActionListener {
         Runnable r4 = new Runnable() {
             @Override
             public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+                updateDropDown("attributes"); //TODO CHANGE THIS LATER
             }
         };
         Runnable r5 = new Runnable() {
             @Override
             public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+                updateScrollPane("results"); //TODO REMOVE THIS LATER
             }
         };
 
@@ -196,8 +196,54 @@ public class Home extends JFrame implements ActionListener {
     }
 
 
+    /**
+     * I guess this doesn't really need to be here.... but I just inherited the class... so I'm just leaving it blank :)
+     */
     @Override
     public void actionPerformed(ActionEvent e) {
 
     }
+
+
+    /**
+     * This should
+     * @param scroll_pane_key
+     */
+    public void updateScrollPane(String scroll_pane_key){
+        String[] test = {"123", "123", "123", "123"};      //TODO SHOULD MAKE DB QUERY HERE TO CREATE THESE STRINGS
+                                                            //TODO OR THIS CAN BE CALLED AFTER A "QUERY-DB METHOD"
+        Object[][] test_data124 = new Object[][]{
+                {"123", "San 123","123","123"}
+        };
+
+        scroll_panes.get(scroll_pane_key).setVisible(false);
+        pane.remove(scroll_panes.get(scroll_pane_key));
+        scroll_panes.put(scroll_pane_key, GeneralJStuff.createTableScrollPane(pane,test,test_data124, 500, 50, 450, 400));
+
+    }
+
+    public void updateDropDown(String drop_down_key){
+
+        String[] array = {"N/A", "test"}; //TODO CHANGE THIS TO BE FROM DB QUERY .. REMEMBER TO HAVE N/A IN THE BEGINNING
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println(drop_downs.get(drop_down_key).getSelectedItem());    //TODO CHANGE THIS
+            }
+        };
+        drop_downs.get(drop_down_key).setVisible(false);
+        pane.remove(drop_downs.get(drop_down_key));
+        drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, array, 500, 500, 100, 100, r));
+
+    }
+
+    public void filterFromDropDown(){
+        //TODO IMPLEMENT ME
+    }
+
+    public void searchFromCheckBox(){
+        //TODO IMPLEMENT ME
+    }
+
+
 }

@@ -18,7 +18,8 @@ public class OracleJDBCExample {
         Connection connection = null;
         try {
             connection = DriverManager.getConnection(
-                    "jdbc:oracle://localhost:1521/ORCLCDB", "admin", "admin");
+                    "jdbc:oracle:thin:@localhost:1521:ORCLCDB","admin","admin");
+                    //"jdbc:oracle:thin@//127.0.0.1:1521", "SYS", "mysecretpassword");
             //"jdbc:oracle:thin:@localhost:1521:xe" "user", "password");
         } catch (SQLException e) {
             System.out.println("Connection Failed! Check output console");

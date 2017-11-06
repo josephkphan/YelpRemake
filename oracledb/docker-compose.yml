@@ -3,7 +3,7 @@ services:
   database:
     image: josephkphan/oracledb:latest
     volumes:
-      - ~/oracle_db/oradata:/opt/oracle/oradata # persistent oracle database data.
+      - ~/oracle_db2/oradata:/opt/oracle/oradata # persistent oracle database data.
     ports:
       - 1521:1521
       - 5500:5500
