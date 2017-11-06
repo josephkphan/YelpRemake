@@ -39,12 +39,25 @@ CREATE TABLE Business (
     business_id VARCHAR(255) PRIMARY KEY, -- Varchar because of input given in excel
     name VARCHAR(255),
     full_address VARCHAR(255),
+    city VARCHAR(255),
+    state VARCHAR(255),
     longitude VARCHAR (255),
     latitude VARCHAR(255),
     review_count INTEGER,
     stars VARCHAR(255),
     type VARCHAR(255),
-    open VARCHAR(255)
+    open VARCHAR(255),
+
+    mon_open VARCHAR(255),
+    mon_close VARCHAR(255),
+    tue_open VARCHAR(255),
+    tue_close VARCHAR(255),
+    wed_open VARCHAR(255),
+    wed_close VARCHAR(255),
+    thu_open VARCHAR(255),
+    thu_close VARCHAR(255),
+    fri_open VARCHAR(255),
+    fri_close VARCHAR(255),
 );
 
 -- Attributes --
@@ -67,26 +80,11 @@ CREATE TABLE Neighborhoods(
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 
-CREATE TABLE Hours(
-    business_id VARCHAR (255),
-    mon_open VARCHAR(255),
-    mon_close VARCHAR(255),
-    tue_open VARCHAR(255),
-    tue_close VARCHAR(255),
-    wed_open VARCHAR(255),
-    wed_close VARCHAR(255),
-    thu_open VARCHAR(255),
-    thu_close VARCHAR(255),
-    fri_open VARCHAR(255),
-    fri_close VARCHAR(255),
-    FOREIGN KEY (business_id) REFERENCES Business(business_id)
-);
-
 ---------------------------------- GATHERED FROM YELP_CHECKIN.JSON --------------------------------------------
 CREATE TABLE CheckIn (
     business_id VARCHAR(255),
     type VARCHAR(255),
-    checkin_indo VARCHAR(255),  --TODO HOW AM I GOING TO DISPLAY THIS SHIT?
+    checkin_info VARCHAR(255),  --TODO HOW AM I GOING TO DISPLAY THIS SHIT?
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 
