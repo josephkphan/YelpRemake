@@ -1,1 +1,0 @@
- docker exec oracledb_database_1 ./setPassword.sh mysecretpasswords

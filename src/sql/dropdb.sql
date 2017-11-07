@@ -5,7 +5,6 @@
 -- DROP Tables --
 DROP TABLE Review;
 DROP TABLE CheckIn;
-DROP TABLE Hours;
 DROP TABLE Neighborhoods;
 DROP TABLE Categories;
 DROP TABLE Attributes;

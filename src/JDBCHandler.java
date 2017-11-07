@@ -27,6 +27,7 @@ public class JDBCHandler {
 
         try {
             connection = DriverManager.getConnection(connection_url, user, pass);
+            statement = connection.createStatement();
         } catch (SQLException e) {
             System.out.println("Connection Failed! Check output console. Exiting Program");
             e.printStackTrace();
@@ -67,6 +68,8 @@ public class JDBCHandler {
             }
         } catch (SQLException e) {
             printExceptionLogs(e);
+        }catch (Exception e){
+            e.printStackTrace();
         }
         return result; //TODO IMPLEMENT ME
 
@@ -75,13 +78,19 @@ public class JDBCHandler {
     /**
      * This method takes in any executeUpdate queries: INSERT, UPDATE, DELETE
      * @param query : sql query
+     * returns true if query was successful
+     * returns false if query failed
      */
-    public void makeUpdateQuery(String query){
+    public boolean makeUpdateQuery(String query){
         try {
             statement.executeUpdate(query);
+            return true;
         }catch (SQLException e) {
             printExceptionLogs(e);
+        }catch(Exception e){
+            e.printStackTrace();
         }
+        return false;
     }
 
 
@@ -89,10 +98,13 @@ public class JDBCHandler {
      * Should call this when GUI Closes to release db connection
      */
     public void closeConnection() {
+        System.out.println("Closing Database Connection!");
         try {
             connection.close();
         } catch (SQLException e) {
             printExceptionLogs(e);
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -104,4 +116,20 @@ public class JDBCHandler {
         System.out.println("SQLState: " + e.getSQLState());
         System.out.println("VendorError: " + e.getErrorCode());
     }
+
+
+
+    public static void main(String[] argv) {
+        //USED FOR TESTING
+        JDBCHandler jdbc_handler = new JDBCHandler();
+//        Boolean i = jdbc_handler.makeUpdateQuery("INSERT INTO YelpUser VALUES('qdtrmBGNgqCvugpHMHL_bKFgQ','Lee','2012-02',3.83,6,'user',0,0,0,0,0,0,0,5,1)");
+        System.out.println(jdbc_handler.makeUpdateQuery("INSERT INTO Business VALUES('vcNAasdWiLM4dR7D2nwwJ7nCA','Eric Goldberg, MD','4840 E Indian School Rd Ste 101 Phoenix, AZ 85018','Phoenix','AZ','-111.983758','33.499313',7,3.5,'business','true','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','null','null','null','null')"));
+
+
+        jdbc_handler.closeConnection();
+
+    }
+
+
+
 }

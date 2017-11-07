@@ -10,15 +10,16 @@ import java.util.*;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import static javafx.application.Platform.exit;
+public class Populate {
 
-public class JSON_Reader {
+    JDBCHandler jdbc_handler;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) { //TODO CHECK THE INPUTS TO HAVE THE 4 json files
+        JDBCHandler jdbc_handler = new JDBCHandler();
 
-        JSON_Reader reader = new JSON_Reader();
+        Populate reader = new Populate(jdbc_handler);
 //        reader.read_file();
-        reader.view_all_file_keys();
+//        reader.view_all_file_keys();
 
         //The Order matters here! Look at createdb so see the dependencies (foreign keys)
         reader.read_json_file("yelp_business.json");
@@ -26,6 +27,11 @@ public class JSON_Reader {
         reader.read_json_file("yelp_review.json");
         reader.read_json_file("yelp_checkin.json");
 
+        jdbc_handler.closeConnection();
+    }
+
+    public Populate(JDBCHandler jdbc_handler){
+        this.jdbc_handler = jdbc_handler;
     }
 
     private void view_all_file_keys(){
@@ -167,7 +173,7 @@ public class JSON_Reader {
      * this will be primarily used with inserting values into the database to explicitly note a value as a string
      */
     private String add_quotes(String s){
-        return "\"" + s + "\"";
+        return "'" + sanitize_string(s) + "'";
     }
 
     private String remove_last_character(String s){
@@ -175,72 +181,11 @@ public class JSON_Reader {
     }
 
     private String sanitize_string(String s){
-        return s.replaceAll("[\n\r]", " ");
+        s = s.replaceAll("[\n\r]", " ");
+        s =  s.replaceAll("'", "");
+        return s.replaceAll("&", "and"); //TODO & Symbols don't work during inserts into DB
     }
 
-    /**
-     * This will covert the json object into an equivalent Database Query Insert String
-     * @param entry : "line" of the json input file
-     * @return Database Query INSERT String
-     */
-    private String insert_to_review(JSONObject entry) {
-
-        List<String> fields = Arrays.asList("review_id", "date", "stars", "text", "type", "user_id", "business_id");
-        List<String> vote_fields = Arrays.asList("cool", "useful", "funny");
-
-        JSONObject votes = (JSONObject) entry.get("votes");
-
-        String[] fields_result = new String[fields.size()];
-        String[] votes_fields_result = new String[vote_fields.size()];
-
-        for(int i=0; i<fields.size(); i++){
-//            System.out.println(fields.get(i) + entry.get(fields.get(i)));
-            fields_result[i] = entry.get(fields.get(i)).toString();
-        }
-
-        for(int i=0; i<vote_fields.size(); i++){
-//            System.out.println(vote_fields.get(i) + votes.get(vote_fields.get(i)));
-            votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
-        }
-
-
-        String insert_string = "INSERT INTO Review VALUES(";
-        //review_id
-        insert_string += add_quotes(fields_result[fields.indexOf("review_id")]);
-        insert_string += ",";
-        //date_string
-        insert_string += add_quotes(fields_result[fields.indexOf("date")]);
-        insert_string += ",";
-        //v_cool
-        insert_string += votes_fields_result[vote_fields.indexOf("cool")];
-        insert_string += ",";
-        //v_useful
-        insert_string += votes_fields_result[vote_fields.indexOf("useful")];
-        insert_string += ",";
-        //v_funny
-        insert_string += votes_fields_result[vote_fields.indexOf("funny")];
-        insert_string += ",";
-        //stars
-        insert_string += fields_result[fields.indexOf("stars")];
-        insert_string += ",";
-        //text
-        insert_string += add_quotes(fields_result[fields.indexOf("text")]);
-        insert_string += ",";
-        //type
-        insert_string += add_quotes(fields_result[fields.indexOf("type")]);
-        insert_string += ",";
-        //user_id
-        insert_string += add_quotes(fields_result[fields.indexOf("user_id")]);
-        insert_string += ",";
-        //business_id
-        insert_string += add_quotes(fields_result[fields.indexOf("business_id")]);
-        insert_string += ");";
-
-        insert_string = sanitize_string(insert_string);
-
-        System.out.println(insert_string);
-        return insert_string;
-    }
 
     /**
      * This will covert the json object into an equivalent Database Query Insert String
@@ -260,6 +205,7 @@ public class JSON_Reader {
 
         String[] fields_result = new String[fields.size()];
         String[] votes_fields_result = new String[vote_fields.size()];
+        String[] compliments_fields_result = new String[compliment_fields.size()];
 
         for(int i=0; i<fields.size(); i++){
 //            System.out.println(fields.get(i) + entry.get(fields.get(i)));
@@ -271,13 +217,16 @@ public class JSON_Reader {
             votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
         }
 
-//        for(int i=0; i<compliment_fields.size(); i++){
-////            System.out.println(vote_fields.get(i) + votes.get(vote_fields.get(i)));
-//            votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
-//        } TODO IMPLEMENT THIS FOR COMPLIMENT.. IF IT IS NULL THEN SHOULD DEFAULT TO 0
+        for(int i=0; i<compliment_fields.size(); i++){
+            try {
+                compliments_fields_result[i] = compliments.get(compliment_fields.get(i)).toString();
+            }catch (Exception e){
+                compliments_fields_result[i] = "0";
+            }
+        }
 
 
-        String insert_string = "INSERT INTO User VALUES(";
+        String insert_string = "INSERT INTO YelpUser VALUES(";
         //user_id
         insert_string += add_quotes(fields_result[fields.indexOf("user_id")]);
         insert_string += ",";
@@ -288,7 +237,7 @@ public class JSON_Reader {
         insert_string += add_quotes(fields_result[fields.indexOf("yelping_since")]);
         insert_string += ",";
         //average_stars
-        insert_string += add_quotes(fields_result[fields.indexOf("average_stars")]); //TODO SHOULD THIS BE QUOTED? IS THIS VARCHAR OR INT?
+        insert_string += fields_result[fields.indexOf("average_stars")];
         insert_string += ",";
         //review_count
         insert_string += fields_result[fields.indexOf("review_count")];
@@ -300,9 +249,25 @@ public class JSON_Reader {
         insert_string += fields_result[fields.indexOf("fans")];
         insert_string += ",";
 
+        //c_note
+        insert_string += compliments_fields_result[compliment_fields.indexOf("note")];
+        insert_string += ",";
 
-        //TODO ??? ADD IN COMPLIMENTS
+        //c_plain
+        insert_string += compliments_fields_result[compliment_fields.indexOf("plain")];
+        insert_string += ",";
 
+        //c_cool
+        insert_string += compliments_fields_result[compliment_fields.indexOf("cool")];
+        insert_string += ",";
+
+        //c_hot
+        insert_string += compliments_fields_result[compliment_fields.indexOf("hot")];
+        insert_string += ",";
+
+        //c_funny
+        insert_string += compliments_fields_result[compliment_fields.indexOf("funny")];
+        insert_string += ",";
 
         //v_cool
         insert_string += votes_fields_result[vote_fields.indexOf("cool")];
@@ -312,11 +277,10 @@ public class JSON_Reader {
         insert_string += ",";
         //v_funny
         insert_string += votes_fields_result[vote_fields.indexOf("funny")];
-        insert_string += ");";
-
-        insert_string = sanitize_string(insert_string);
+        insert_string += ")";
 
         System.out.println(insert_string);
+        System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
         return insert_string;
     }
 
@@ -380,28 +344,28 @@ public class JSON_Reader {
         insert_string += add_quotes(fields_result[fields.indexOf("full_address")]);
         insert_string += ",";
         //city
-        insert_string += add_quotes(fields_result[fields.indexOf("city")]); //TODO SHOULD THIS BE QUOTED? IS THIS VARCHAR OR INT?
+        insert_string += add_quotes(fields_result[fields.indexOf("city")]);
         insert_string += ",";
         //state
-        insert_string += fields_result[fields.indexOf("state")];
+        insert_string += add_quotes(fields_result[fields.indexOf("state")]);
         insert_string += ",";
         //longitude
         insert_string += add_quotes(fields_result[fields.indexOf("longitude")]);
         insert_string += ",";
         //latitude
-        insert_string += fields_result[fields.indexOf("latitude")];
+        insert_string += add_quotes(fields_result[fields.indexOf("latitude")]);
         insert_string += ",";
         //review_count
-        insert_string += add_quotes(fields_result[fields.indexOf("review_count")]);
+        insert_string += fields_result[fields.indexOf("review_count")];
         insert_string += ",";
         //open
         insert_string += fields_result[fields.indexOf("stars")];
         insert_string += ",";
         //type
-        insert_string += fields_result[fields.indexOf("type")];
+        insert_string += add_quotes(fields_result[fields.indexOf("type")]);
         insert_string += ",";
         //open
-        insert_string += fields_result[fields.indexOf("open")];
+        insert_string += add_quotes(fields_result[fields.indexOf("open")]);
         insert_string += ",";
 
         for (String s : hour_fields_result){
@@ -410,16 +374,12 @@ public class JSON_Reader {
         }
 
         insert_string = remove_last_character(insert_string);
-
-        insert_string += ");";
-
-        insert_string = sanitize_string(insert_string);
+        insert_string += ")";
 
         System.out.println(insert_string);
-
+        System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
 
         insert_to_business_attributes(fields_result[fields.indexOf("business_id")], attributes);
-
         insert_to_business_categories(fields_result[fields.indexOf("business_id")], categories);
 
 
@@ -436,9 +396,10 @@ public class JSON_Reader {
             insert_string += add_quotes(key.toString());
             insert_string += ",";
             insert_string += add_quotes(entry.get(key).toString());
-            insert_string += ");";
-            insert_string = sanitize_string(insert_string);
+            insert_string += ")";
+
             System.out.println(insert_string);
+            System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
         }
 
     }
@@ -449,11 +410,76 @@ public class JSON_Reader {
             insert_string += add_quotes(business_id);
             insert_string += ",";
             insert_string += add_quotes(s.toString());
-            insert_string += ");";
-            insert_string = sanitize_string(insert_string);
+            insert_string += ")";
+
             System.out.println(insert_string);
+            System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
         }
 
+    }
+
+
+    /**
+     * This will covert the json object into an equivalent Database Query Insert String
+     * @param entry : "line" of the json input file
+     * @return Database Query INSERT String
+     */
+    private String insert_to_review(JSONObject entry) {
+
+        List<String> fields = Arrays.asList("review_id", "date", "stars", "text", "type", "user_id", "business_id");
+        List<String> vote_fields = Arrays.asList("cool", "useful", "funny");
+
+        JSONObject votes = (JSONObject) entry.get("votes");
+
+        String[] fields_result = new String[fields.size()];
+        String[] votes_fields_result = new String[vote_fields.size()];
+
+        for(int i=0; i<fields.size(); i++){
+//            System.out.println(fields.get(i) + entry.get(fields.get(i)));
+            fields_result[i] = entry.get(fields.get(i)).toString();
+        }
+
+        for(int i=0; i<vote_fields.size(); i++){
+//            System.out.println(vote_fields.get(i) + votes.get(vote_fields.get(i)));
+            votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
+        }
+
+
+        String insert_string = "INSERT INTO Review VALUES(";
+        //review_id
+        insert_string += add_quotes(fields_result[fields.indexOf("review_id")]);
+        insert_string += ",";
+        //date_string
+        insert_string += add_quotes(fields_result[fields.indexOf("date")]);
+        insert_string += ",";
+        //v_cool
+        insert_string += votes_fields_result[vote_fields.indexOf("cool")];
+        insert_string += ",";
+        //v_useful
+        insert_string += votes_fields_result[vote_fields.indexOf("useful")];
+        insert_string += ",";
+        //v_funny
+        insert_string += votes_fields_result[vote_fields.indexOf("funny")];
+        insert_string += ",";
+        //stars
+        insert_string += fields_result[fields.indexOf("stars")];
+        insert_string += ",";
+        //text
+        insert_string += add_quotes(fields_result[fields.indexOf("text")]);
+        insert_string += ",";
+        //type
+        insert_string += add_quotes(fields_result[fields.indexOf("type")]);
+        insert_string += ",";
+        //user_id
+        insert_string += add_quotes(fields_result[fields.indexOf("user_id")]);
+        insert_string += ",";
+        //business_id
+        insert_string += add_quotes(fields_result[fields.indexOf("business_id")]);
+        insert_string += ")";
+
+        System.out.println(insert_string);
+        System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
+        return insert_string;
     }
 
 
@@ -482,8 +508,8 @@ public class JSON_Reader {
         insert_string += ",";
         //yelping_since
         insert_string += add_quotes(fields_result[fields.indexOf("checkin_info")]);
-        insert_string += ");";
-        insert_string = sanitize_string(insert_string);
+        insert_string += ")";
+
         System.out.println(insert_string);
         return insert_string;
     }
