@@ -1,4 +1,4 @@
-import Interface.Home;
+
 import javax.swing.*;
 
 /**
@@ -11,7 +11,7 @@ public class  Main {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new Home();
+                new Home(new JDBCHandler());
             }
         });
     }

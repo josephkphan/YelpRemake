@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class JDBCHandler {
 
@@ -57,22 +59,63 @@ public class JDBCHandler {
      * This method takes in any search queries. i.e. SELECT * FROM <TABLE_NAME>
      * @param query : sql query
      */
-    public String makeSearchQuery(String query) {
+    public ArrayList<String[]> makeSearchQuery(String query, int num_columns) {
+        ArrayList<String[]> final_result = new ArrayList<>();
 
         ResultSet result_set;
         String result = "";
         try {
             result_set = statement.executeQuery(query);
             while (result_set.next()) {
-                System.out.println();
+                String[] row = new String[num_columns];
+                for (int i=0; i< num_columns; i++){
+                    row[i] = result_set.getString(i+1);
+                }
+                final_result.add(row);
             }
         } catch (SQLException e) {
             printExceptionLogs(e);
         }catch (Exception e){
             e.printStackTrace();
         }
-        return result; //TODO IMPLEMENT ME
+        return final_result;
 
+    }
+
+    /**
+     *
+     * @param list
+     * @return
+     */
+    public Object[][] arrayListToObjectArray(ArrayList<String[]> list){
+        if(list.size() == 0){
+            return new Object[0][0];
+        }
+        Object[][] obj = new Object[list.size()][list.get(0).length];
+        for(int i=0; i<list.size(); i++){
+            for (int j=0; j<list.get(i).length; j++){
+                obj[i][j]= list.get(i)[j];
+            }
+        }
+        System.out.println(list.toString());
+        return obj;
+    }
+
+    /**
+     *
+     * @param list
+     * @return
+     */
+    public String[] arrayListToStringArray(ArrayList<String[]> list){
+        if(list.size() == 0){
+            return new String[0];
+        }
+        String[] arr = new String[list.size()];
+        for(int i=0; i<list.size(); i++){
+            arr[i] = list.get(i)[0];
+        }
+//        System.out.println(Arrays.toString(arr));
+        return arr;
     }
 
     /**
@@ -123,9 +166,9 @@ public class JDBCHandler {
         //USED FOR TESTING
         JDBCHandler jdbc_handler = new JDBCHandler();
 //        Boolean i = jdbc_handler.makeUpdateQuery("INSERT INTO YelpUser VALUES('qdtrmBGNgqCvugpHMHL_bKFgQ','Lee','2012-02',3.83,6,'user',0,0,0,0,0,0,0,5,1)");
-        System.out.println(jdbc_handler.makeUpdateQuery("INSERT INTO Business VALUES('vcNAasdWiLM4dR7D2nwwJ7nCA','Eric Goldberg, MD','4840 E Indian School Rd Ste 101 Phoenix, AZ 85018','Phoenix','AZ','-111.983758','33.499313',7,3.5,'business','true','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','null','null','null','null')"));
+//        System.out.println(jdbc_handler.makeUpdateQuery("INSERT INTO Business VALUES('vcNAasdWiLM4dR7D2nwwJ7nCA','Eric Goldberg, MD','4840 E Indian School Rd Ste 101 Phoenix, AZ 85018','Phoenix','AZ','-111.983758','33.499313',7,3.5,'business','true','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','08:00','17:00','null','null','null','null')"));
 
-
+        jdbc_handler.arrayListToStringArray(jdbc_handler.makeSearchQuery("SELECT name,user_id from YelpUser", 2));
         jdbc_handler.closeConnection();
 
     }

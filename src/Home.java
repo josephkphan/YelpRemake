@@ -1,13 +1,9 @@
-package Interface;
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+
 
 /**
  * Provides a nice visual for users. Regular users can use the RCMs while admins can view the
@@ -15,6 +11,8 @@ import java.util.Map;
  */
 
 public class Home extends JFrame implements ActionListener {
+
+    JDBCHandler jdbc_handler;
 
     private static final int WINDOW_WIDTH = 1000;
     private static final int WINDOW_HEIGHT = 600;
@@ -55,19 +53,19 @@ public class Home extends JFrame implements ActionListener {
     /*  Description
         Services -- far left column i.e. Restaurants, Sports
         Categories -- middle column i.e. Mexican, Asian
-        Optioms -- right column i.e. price range
+        Options -- right column i.e. price range
      */
 
     //TODO THESE STRINGS SHOULD BE CREATED DYNAMICALLY
-    private String[] string_days_of_week = {"N/A","Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
+    private String[] string_days_of_week = {"N/A", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
 
     private String[] string_hours_of_day =
-            {"N/A","12:00AM", "1:00AM", "2:00AM", "3:00AM", "4:00AM", "5:00AM", "6:00AM", "7:00AM", "8:00AM", "9:00AM", "10:00AM", "11:00AM",
+            {"N/A", "12:00AM", "1:00AM", "2:00AM", "3:00AM", "4:00AM", "5:00AM", "6:00AM", "7:00AM", "8:00AM", "9:00AM", "10:00AM", "11:00AM",
                     "12:00PM", "1:00PM", "2:00PM", "3:00PM", "4:00PM", "5:00PM", "6:00PM", "7:00PM", "8:00PM", "9:00PM", "10:00PM", "11:00PM"
             };
 
     private String[] main_business_categories = {
-      "Active Life", "Arts & Entertainment", "Automotive", "Car Rental", "Cafe",
+            "Active Life", "Arts & Entertainment", "Automotive", "Car Rental", "Cafe",
             "Beauty & Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
             "Department Stores", "Education", "Event Planning & Services", "Flowers & Gifts",
             "Food", "Health & Medical", "Home Services", "Home & Garden", "Hospitals", "Hotels & Travel",
@@ -78,15 +76,30 @@ public class Home extends JFrame implements ActionListener {
     private String[] result_columns = {"Business", "City", "State", "Stars"};
 
     Object[][] test_data = new Object[][]{
-            {"R1", "San Jose","CA","3"},
-            {"R2", "San Jose","CA","4"},
-            {"R3", "San Jose","CA","5"}
+            {"R1", "San Jose", "CA", "3"},
+            {"R2", "San Jose", "CA", "4"},
+            {"R3", "San Jose", "CA", "5"}
     };
 
 
 
-    public Home() {
 
+    //These Variables are controlled by the GUI and will alter the final search results -- builder blocks for SQL query
+    private Set<String> services = new HashSet<>();
+
+    private Set<String> categories = new HashSet<>();
+
+    private Set<String> options = new HashSet<>();
+
+    private String day_of_week = "";
+    private String start_time = "";
+    private String end_time = "";
+    private String attributes = "";
+
+
+
+    public Home(JDBCHandler jdbc_handler) {
+        this.jdbc_handler = jdbc_handler;
         //Gui Stuff
         JFrame frame = new JFrame("Home Window");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -131,21 +144,22 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createButtons() {
-        Runnable r4 = new Runnable() {
+        Runnable r_search = new Runnable() {
             @Override
             public void run() {
                 updateDropDown("attributes"); //TODO CHANGE THIS LATER
             }
         };
-        Runnable r5 = new Runnable() {
+        Runnable r_close = new Runnable() {
             @Override
             public void run() {
                 updateScrollPane("results"); //TODO REMOVE THIS LATER
+                //TODO SHOULD BE System.exit(0);
             }
         };
 
-        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 700, 500, 100, 25, r4));
-        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 850, 500, 100, 25, r5));
+        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 700, 500, 100, 25, r_search));
+        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 850, 500, 100, 25, r_close));
     }
 
     /**
@@ -153,35 +167,36 @@ public class Home extends JFrame implements ActionListener {
      */
     public void createDropDowns() {
         // Creating Drop Downs
-        Runnable r0 = new Runnable() {
+        Runnable r_day_of_week = new Runnable() {
             @Override
             public void run() {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
             }
         };
 
-        Runnable r1 = new Runnable() {
+        Runnable r_start_time = new Runnable() {
             @Override
             public void run() {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
             }
         };
-        Runnable r2 = new Runnable() {
+        Runnable r_end_time = new Runnable() {
             @Override
             public void run() {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
             }
         };
-        Runnable r3 = new Runnable() {
+        Runnable r_attributes = new Runnable() {
             @Override
             public void run() {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+
             }
         };
-        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r0));
-        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 200, 500, 100, 100, r1));
-        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 350, 500, 100, 100, r2));
-        drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, string_hours_of_day, 500, 500, 100, 100, r3));
+        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
+        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 200, 500, 100, 100, r_start_time));
+        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 350, 500, 100, 100, r_end_time));
+        drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, string_hours_of_day, 500, 500, 100, 100, r_attributes));
 
     }
 
@@ -189,10 +204,10 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createScrollPanes() {
-        scroll_panes.put("categories", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 50, 50, 145, 400));
-        scroll_panes.put("service", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 200, 50, 145, 400));
-        scroll_panes.put("options", GeneralJStuff.createCheckBoxScrollPane(pane,main_business_categories, 350, 50, 145, 400));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane,result_columns,test_data, 500, 50, 450, 400));
+        scroll_panes.put("categories", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 50, 50, 145, 400, categories) );
+        scroll_panes.put("service", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 200, 50, 145, 400, services));
+        scroll_panes.put("options", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 350, 50, 145, 400,options));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, test_data, 500, 50, 450, 400));
     }
 
 
@@ -207,22 +222,23 @@ public class Home extends JFrame implements ActionListener {
 
     /**
      * This should
+     *
      * @param scroll_pane_key
      */
-    public void updateScrollPane(String scroll_pane_key){
+    public void updateScrollPane(String scroll_pane_key) {
         String[] test = {"123", "123", "123", "123"};      //TODO SHOULD MAKE DB QUERY HERE TO CREATE THESE STRINGS
-                                                            //TODO OR THIS CAN BE CALLED AFTER A "QUERY-DB METHOD"
+        //TODO OR THIS CAN BE CALLED AFTER A "QUERY-DB METHOD"
         Object[][] test_data124 = new Object[][]{
-                {"123", "San 123","123","123"}
+                {"123", "San 123", "123", "123"}
         };
 
         scroll_panes.get(scroll_pane_key).setVisible(false);
         pane.remove(scroll_panes.get(scroll_pane_key));
-        scroll_panes.put(scroll_pane_key, GeneralJStuff.createTableScrollPane(pane,test,test_data124, 500, 50, 450, 400));
+        scroll_panes.put(scroll_pane_key, GeneralJStuff.createTableScrollPane(pane, test, test_data124, 500, 50, 450, 400));
 
     }
 
-    public void updateDropDown(String drop_down_key){
+    public void updateDropDown(String drop_down_key) {
 
         String[] array = {"N/A", "test"}; //TODO CHANGE THIS TO BE FROM DB QUERY .. REMEMBER TO HAVE N/A IN THE BEGINNING
         Runnable r = new Runnable() {
@@ -237,13 +253,18 @@ public class Home extends JFrame implements ActionListener {
 
     }
 
-    public void filterFromDropDown(){
-        //TODO IMPLEMENT ME
+    /**
+     * Triggered by Search Button
+     */
+    private void queryFindBusiness(){
+
     }
 
-    public void searchFromCheckBox(){
-        //TODO IMPLEMENT ME
+    private void queryFind(){
+
     }
+
+
 
 
 }

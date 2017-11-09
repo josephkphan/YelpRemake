@@ -1,5 +1,3 @@
-package Interface;
-
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -8,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Set;
 
 /**
  * A nice Wrapper Class to easily user JFrame. This is recommended to use with JFrame's absolute Layout
@@ -48,7 +47,8 @@ public class GeneralJStuff {
 
     }
 
-    static JScrollPane createCheckBoxScrollPane(Container pane, String[] str_list, int x, int y, int width, int height){
+    static JScrollPane createCheckBoxScrollPane(Container pane, String[] str_list, int x, int y, int width, int height,  Set<String> set){
+        //TODO Remove Set<String set.. this is adds coupling.. not the best way. quick workaround
         JScrollPane component;
         CheckListItem[] arr = new CheckListItem[str_list.length];
         for (int i=0; i<str_list.length; i++){
@@ -67,7 +67,18 @@ public class GeneralJStuff {
                         .getElementAt(index);
                 item.setSelected(!item.isSelected()); // Toggle selected state
                 list.repaint(list.getCellBounds(index, index));// Repaint cell
+                String item_string = item.toString();
                 System.out.println(item.toString()); //TODO THIS IS THE PRINT STATEMENT
+
+
+                if(set.contains(item_string)){
+                    set.remove(item_string);
+                }else{
+                    set.add(item_string);
+                }
+
+                System.out.println(set.toString());
+
             }
         });
 
@@ -76,6 +87,7 @@ public class GeneralJStuff {
         pane.add(component);
         return component;
     }
+
 
     static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data,  int x, int y, int width, int height){
         JScrollPane component;
