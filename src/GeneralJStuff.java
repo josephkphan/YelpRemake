@@ -47,7 +47,7 @@ public class GeneralJStuff {
 
     }
 
-    static JScrollPane createCheckBoxScrollPane(Container pane, String[] str_list, int x, int y, int width, int height,  Set<String> set){
+    static JScrollPane createCheckBoxScrollPane(Container pane, String[] str_list, int x, int y, int width, int height,  Set<String> set, Runnable r){
         //TODO Remove Set<String set.. this is adds coupling.. not the best way. quick workaround
         JScrollPane component;
         CheckListItem[] arr = new CheckListItem[str_list.length];
@@ -70,14 +70,14 @@ public class GeneralJStuff {
                 String item_string = item.toString();
                 System.out.println(item.toString()); //TODO THIS IS THE PRINT STATEMENT
 
-
                 if(set.contains(item_string)){
                     set.remove(item_string);
                 }else{
                     set.add(item_string);
                 }
-
                 System.out.println(set.toString());
+
+                r.run();
 
             }
         });
@@ -89,16 +89,23 @@ public class GeneralJStuff {
     }
 
 
-    static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data,  int x, int y, int width, int height){
+    static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data, String[] data_ids,  int x, int y, int width, int height, StringBuilder id, StringBuilder name, Runnable r){
         JScrollPane component;
         JTable table = new JTable(data, col_names);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
             public void valueChanged(ListSelectionEvent event) {//TODO BUG this produces two windows
                 // do some actions here, for example
                 // print first column value from selected row
-                String restaurant_name = table.getValueAt(table.getSelectedRow(), 0).toString();
-                System.out.println(restaurant_name);
-                new Reviews(restaurant_name);
+                String business_name = table.getValueAt(table.getSelectedRow(), 0).toString();
+                String business_id = data_ids[table.getSelectedRow()];
+                System.out.println(business_id);
+                id.setLength(0); // clear it out
+                id.append(business_id);
+                name.setLength(0);
+                name.append(business_name);
+
+                r.run();
+
             }
         });
 
@@ -107,6 +114,16 @@ public class GeneralJStuff {
         pane.add(component);
         return component;
     }
+
+    static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data,  int x, int y, int width, int height){
+        JScrollPane component;
+        JTable table = new JTable(data, col_names);
+        component = new JScrollPane(table);
+        component.setBounds(x, y, width, height);
+        pane.add(component);
+        return component;
+    }
+
 
 
 

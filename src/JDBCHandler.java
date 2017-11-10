@@ -63,9 +63,10 @@ public class JDBCHandler {
         ArrayList<String[]> final_result = new ArrayList<>();
 
         ResultSet result_set;
-        String result = "";
         try {
+            System.out.println("Making Query: " + query);
             result_set = statement.executeQuery(query);
+            System.out.println("Got Results for Query: " + query);
             while (result_set.next()) {
                 String[] row = new String[num_columns];
                 for (int i=0; i< num_columns; i++){
@@ -172,6 +173,8 @@ public class JDBCHandler {
         jdbc_handler.closeConnection();
 
     }
+
+
 
 
 

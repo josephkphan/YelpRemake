@@ -45,9 +45,9 @@ public class Home extends JFrame implements ActionListener {
 
     private Map<String, JScrollPane> scroll_panes;
     /*  List of Scroll Panes:
-            services
             categories
-            options
+            type
+            attributes
      */
 
     /*  Description
@@ -65,37 +65,43 @@ public class Home extends JFrame implements ActionListener {
             };
 
     private String[] main_business_categories = {
-            "Active Life", "Arts & Entertainment", "Automotive", "Car Rental", "Cafe",
-            "Beauty & Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
-            "Department Stores", "Education", "Event Planning & Services", "Flowers & Gifts",
-            "Food", "Health & Medical", "Home Services", "Home & Garden", "Hospitals", "Hotels & Travel",
-            "Hardware Stores", "Grocery", "medical Centers", "Nurseries & Gardening", "Nightlife",
+            "Active Life", "Arts and Entertainment", "Automotive", "Car Rental", "Cafe",
+            "Beauty and Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
+            "Department Stores", "Education", "Event Planning and Services", "Flowers and Gifts",
+            "Food", "Health and Medical", "Home Services", "Home and Garden", "Hospitals", "Hotels and Travel",
+            "Hardware Stores", "Grocery", "medical Centers", "Nurseries and Gardening", "Nightlife",
             "Restaurants", "Shopping", "Transportation"
     };
 
+    private String[] sub_business_categories = {};
+
     private String[] result_columns = {"Business", "City", "State", "Stars"};
 
-    Object[][] test_data = new Object[][]{
-            {"R1", "San Jose", "CA", "3"},
-            {"R2", "San Jose", "CA", "4"},
-            {"R3", "San Jose", "CA", "5"}
-    };
+    Object[][] data = new Object[][]{};
+
+    String[] data_ids;
 
 
+    Object[][] reviews_data = new Object[][]{};
 
 
     //These Variables are controlled by the GUI and will alter the final search results -- builder blocks for SQL query
-    private Set<String> services = new HashSet<>();
+    private Set<String> categories_set = new HashSet<>();
 
-    private Set<String> categories = new HashSet<>();
+    private Set<String> type_set = new HashSet<>();
 
-    private Set<String> options = new HashSet<>();
+    private Set<String> attributes_set = new HashSet<>();
 
     private String day_of_week = "";
     private String start_time = "";
     private String end_time = "";
     private String attributes = "";
+    private StringBuilder business_id_requested = new StringBuilder();
+    private StringBuilder review_business_name = new StringBuilder();
 
+
+    private int open_every_other_counter = 0; //TODO THIS IS A HOT FIX FOR OPENING REVIEWS
+    //Reviews currently open up two every click? this toggle will allow one . %2
 
 
     public Home(JDBCHandler jdbc_handler) {
@@ -147,14 +153,14 @@ public class Home extends JFrame implements ActionListener {
         Runnable r_search = new Runnable() {
             @Override
             public void run() {
-                updateDropDown("attributes"); //TODO CHANGE THIS LATER
+                queryFindBusiness.run();
+                updateScrollPane("results");
             }
         };
         Runnable r_close = new Runnable() {
             @Override
             public void run() {
-                updateScrollPane("results"); //TODO REMOVE THIS LATER
-                //TODO SHOULD BE System.exit(0);
+                System.exit(0);
             }
         };
 
@@ -171,26 +177,29 @@ public class Home extends JFrame implements ActionListener {
             @Override
             public void run() {
                 System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+                day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
             }
         };
 
         Runnable r_start_time = new Runnable() {
             @Override
             public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+                System.out.println(drop_downs.get("start_time").getSelectedItem());
+                start_time = drop_downs.get("start_time").getSelectedItem().toString();
             }
         };
         Runnable r_end_time = new Runnable() {
             @Override
             public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+                System.out.println(drop_downs.get("end_time").getSelectedItem());
+                end_time = drop_downs.get("end_time").getSelectedItem().toString();
             }
         };
         Runnable r_attributes = new Runnable() {
             @Override
             public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
-
+                System.out.println(drop_downs.get("attributes").getSelectedItem());
+                attributes = drop_downs.get("attributes").getSelectedItem().toString();
             }
         };
         drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
@@ -204,10 +213,10 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createScrollPanes() {
-        scroll_panes.put("categories", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 50, 50, 145, 400, categories) );
-        scroll_panes.put("service", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 200, 50, 145, 400, services));
-        scroll_panes.put("options", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 350, 50, 145, 400,options));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, test_data, 500, 50, 450, 400));
+        scroll_panes.put("type", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 50, 50, 145, 400, categories_set, queryFindTypes));
+        scroll_panes.put("service", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 200, 50, 145, 400, type_set, queryFindTypes));
+        scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 350, 50, 145, 400, attributes_set, queryFindTypes));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data,data_ids, 500, 50, 450, 400, business_id_requested,review_business_name, createReviews ));
     }
 
 
@@ -226,16 +235,10 @@ public class Home extends JFrame implements ActionListener {
      * @param scroll_pane_key
      */
     public void updateScrollPane(String scroll_pane_key) {
-        String[] test = {"123", "123", "123", "123"};      //TODO SHOULD MAKE DB QUERY HERE TO CREATE THESE STRINGS
-        //TODO OR THIS CAN BE CALLED AFTER A "QUERY-DB METHOD"
-        Object[][] test_data124 = new Object[][]{
-                {"123", "San 123", "123", "123"}
-        };
 
         scroll_panes.get(scroll_pane_key).setVisible(false);
         pane.remove(scroll_panes.get(scroll_pane_key));
-        scroll_panes.put(scroll_pane_key, GeneralJStuff.createTableScrollPane(pane, test, test_data124, 500, 50, 450, 400));
-
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data,data_ids, 500, 50, 450, 400, business_id_requested,review_business_name, createReviews ));
     }
 
     public void updateDropDown(String drop_down_key) {
@@ -256,14 +259,123 @@ public class Home extends JFrame implements ActionListener {
     /**
      * Triggered by Search Button
      */
-    private void queryFindBusiness(){
+    Runnable queryFindBusiness = new Runnable() {
+        @Override
+        public void run() {
+            String search_query = "SELECT DISTINCT b.name, b.city, b.state, b.review_count, b.business_id " +
+                    "FROM Business b " +
+                    "INNER JOIN Categories c ON b.business_id=c.business_id " +
+                    "INNER JOIN Attributes a ON b.business_id=a.business_id ";
+
+            if (categories_set.size() != 0) {
+                search_query += "WHERE ";
+            }
+
+            search_query += createCategoriesString();
+            search_query += createAttributesString();
+
+            ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 4);
+            System.out.println(Arrays.toString(data));
+
+            data = jdbc_handler.arrayListToObjectArray(results);
+
+            results = jdbc_handler.makeSearchQuery(search_query, 5);
+
+            data_ids = new String[results.size()];
+            for(int i=0; i<results.size(); i++){
+                data_ids[i] = results.get(i)[4];
+            }
+            System.out.println(Arrays.toString(data_ids));
+        }
+    };
+
+
+
+    // Second Column: Based off of Category
+    Runnable queryFindTypes = new Runnable() {
+        @Override
+        public void run() {
+            String search_query = "SELECT DISTINCT(c.category)  " +
+                    "FROM Business b " +
+                    "INNER JOIN Categories c ON b.business_id=c.business_id ";
+
+            if (categories_set.size() != 0){
+                search_query += "WHERE ";
+            }
+
+            search_query += createCategoriesString();
+
+            ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 1);
+            String[] string_results = jdbc_handler.arrayListToStringArray(results);
+            System.out.println(Arrays.toString(string_results));
+
+            sub_business_categories = string_results;
+
+        }
+    };
+
+
+    // Third column: Based off of categories and type
+    private void queryFindAttributes() {
 
     }
 
-    private void queryFind(){
 
+    // Second Column: Based off of Category
+    Runnable createReviews = new Runnable() {
+        @Override
+        public void run() {
+            if (open_every_other_counter++ %2 == 0) {//TODO git staHOT FIX
+                String search_query = "SELECT r.date_string, r.stars, r.text, r.user_id, r.v_useful " +
+                        "FROM Business b " +
+                        "INNER JOIN Review r ON b.business_id=r.business_id " +
+                        "WHERE  r.business_id=" + addQuotes(business_id_requested.toString());
+
+                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 5);
+                Object[][] obj_results = jdbc_handler.arrayListToObjectArray(results);
+                System.out.println(Arrays.toString(obj_results));
+
+                reviews_data = obj_results;
+
+                new Reviews(review_business_name.toString(), reviews_data);
+            }
+
+        }
+    };
+
+
+    // ------------------------- Miscellaneous ----------------------- //
+
+    private String addQuotes(String s){
+        return "'" + (s) + "'";
     }
 
+
+    private String createCategoriesString(){
+        String string = "";
+        int counter = 0;
+        for (String str : categories_set) {
+            string += " c.category=";
+            string += addQuotes(str);
+            if (counter++ != categories_set.size() - 1) {
+                string += " OR ";
+            }
+        }
+        return string;
+    }
+
+    private String createAttributesString(){
+        int counter = 0;
+        String string = "";
+        for (String str : attributes_set){
+            string += " a.attribute=";
+            string += addQuotes(str);
+            if (counter++ != attributes_set.size() - 1) {
+                string += " OR ";
+            }
+        }
+        return string;
+    }
 
 
 
