@@ -26,11 +26,11 @@ CREATE TABLE YelpUser (
 );
 
 CREATE TABLE Friends (
-    user_id VARCHAR(100) Primary Key
+    user_id VARCHAR(100)
 );
 
 CREATE TABLE Elite (
-    user_id VARCHAR(100) Primary Key
+    user_id VARCHAR(100)
 );
 
 ---------------------------------- GATHERED FROM YELP_BUSINESS.JSON --------------------------------------------
@@ -65,26 +65,26 @@ CREATE TABLE Business (
 
 -- Attributes --
 CREATE TABLE Attributes(
-    business_id VARCHAR(100) Primary Key,
+    business_id VARCHAR(100),
     attribute VARCHAR(100),
     value VARCHAR (2500), --true or false
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 
 CREATE TABLE MainCategories(
-    business_id VARCHAR(100) Primary Key,
+    business_id VARCHAR(100),
     category VARCHAR(100),
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 
 CREATE TABLE SubCategories(
-    business_id VARCHAR(100) Primary Key,
+    business_id VARCHAR(100),
     category VARCHAR(100),
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 
 CREATE TABLE Neighborhoods(
-    business_id VARCHAR (100) Primary Key,
+    business_id VARCHAR (100),
     neighborhood VARCHAR(100),
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
@@ -107,7 +107,7 @@ CREATE TABLE Review(
 
 ---------------------------------- GATHERED FROM YELP_CHECKIN.JSON --------------------------------------------
 CREATE TABLE CheckIn (
-    business_id VARCHAR(100) Primary Key,
+    business_id VARCHAR(100),
     type VARCHAR(100),
     checkin_info VARCHAR(2000),  --TODO HOW AM I GOING TO DISPLAY THIS SHIT?
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
