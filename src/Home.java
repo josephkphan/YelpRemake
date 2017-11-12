@@ -64,6 +64,10 @@ public class Home extends JFrame implements ActionListener {
                     "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"
             };
 
+    private String[] string_start_hours_of_day = {"N/A"};
+
+    private String[] string_end_hours_of_day = {"N/A"};
+
     private String[] main_business_categories = {
             "Active Life", "Arts and Entertainment", "Automotive", "Car Rental", "Cafe",
             "Beauty and Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
@@ -182,44 +186,10 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createDropDowns() {
-        // Creating Drop Downs
-        Runnable r_day_of_week = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("day_of_week").getSelectedItem());
-                day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
-            }
-        };
 
-        Runnable r_start_time = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("start_time").getSelectedItem());
-                start_time = drop_downs.get("start_time").getSelectedItem().toString();
-            }
-        };
-        Runnable r_end_time = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("end_time").getSelectedItem());
-                if(drop_downs.get("end_time").getSelectedItem().toString().compareTo("00:00")==0){
-                    end_time = "24:00";
-                }else {
-                    end_time = drop_downs.get("end_time").getSelectedItem().toString();
-                }
-
-            }
-        };
-        Runnable r_attributes = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get("attributes").getSelectedItem());
-                search_attribute = drop_downs.get("attributes").getSelectedItem().toString();
-            }
-        };
         drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
-        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 200, 500, 100, 100, r_start_time));
-        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_hours_of_day, 350, 500, 100, 100, r_end_time));
+        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
+        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
         drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, string_hours_of_day, 500, 500, 100, 100, r_attributes));
 
     }
@@ -243,20 +213,6 @@ public class Home extends JFrame implements ActionListener {
 
     }
 
-    public void updateDropDown(String drop_down_key) {
-
-        String[] array = {"N/A", "test"}; //TODO CHANGE THIS TO BE FROM DB QUERY .. REMEMBER TO HAVE N/A IN THE BEGINNING
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                System.out.println(drop_downs.get(drop_down_key).getSelectedItem());    //TODO CHANGE THIS
-            }
-        };
-        drop_downs.get(drop_down_key).setVisible(false);
-        pane.remove(drop_downs.get(drop_down_key));
-        drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, array, 500, 500, 100, 100, r));
-
-    }
 
     /**
      * Triggered by Search Button
@@ -318,9 +274,48 @@ public class Home extends JFrame implements ActionListener {
                 System.out.println("--------------------");
                 System.out.println(schedule.toString());
 
+                updateFilterDropDowns();
                 filterByTime();
 
             }
+        }
+    };
+
+    // --------------------------------------- Runnables ---------------------------------------- //
+
+    // Creating Drop Downs
+    Runnable r_day_of_week = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+            day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
+        }
+    };
+
+    Runnable r_start_time = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("start_time").getSelectedItem());
+            start_time = drop_downs.get("start_time").getSelectedItem().toString();
+        }
+    };
+    Runnable r_end_time = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("end_time").getSelectedItem());
+            if (drop_downs.get("end_time").getSelectedItem().toString().compareTo("00:00") == 0) {
+                end_time = "24:00";
+            } else {
+                end_time = drop_downs.get("end_time").getSelectedItem().toString();
+            }
+
+        }
+    };
+    Runnable r_attributes = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("attributes").getSelectedItem());
+            search_attribute = drop_downs.get("attributes").getSelectedItem().toString();
         }
     };
 
@@ -549,10 +544,10 @@ public class Home extends JFrame implements ActionListener {
             System.out.print(arr[open_index] + "  " + arr[end_index]);
 
             if (arr[end_index].compareTo("null") == 0 &&
-                    arr[open_index].compareTo("null") == 0){
+                    arr[open_index].compareTo("null") == 0) {
                 passed_start_check = false;
                 passed_end_check = false;
-            }else {
+            } else {
 
                 if (start_time.compareTo("N/A") == 0) {
                     passed_start_check = true;
@@ -587,12 +582,12 @@ public class Home extends JFrame implements ActionListener {
                 schedule.remove(i);
                 data_ids.remove(i);
                 data_arraylist.remove(i);
-                if(schedule.size()<=0){
+                if (schedule.size() <= 0) {
                     break;
                 }
                 i--;
                 System.out.println("DELETING ENTRY");
-            }else{
+            } else {
                 System.out.println("KEEPING ENTRY");
 
             }
@@ -613,5 +608,91 @@ public class Home extends JFrame implements ActionListener {
         String[] arr = new String[al.size()];
         return al.toArray(arr);
     }
+
+    private void updateFilterDropDowns(){
+        Set<String> days_found = new HashSet<>();
+        Set<String> start_times_found = new HashSet<>();
+        Set<String> end_times_found = new HashSet<>();
+        for(String[] arr : schedule ){
+            if(arr[0].compareTo("null")!=0){
+                days_found.add("Monday");
+            }
+
+            if(arr[2].compareTo("null")!=0){
+                days_found.add("Tuesday");
+            }
+
+            if(arr[4].compareTo("null")!=0){
+                days_found.add("Wednesday");
+            }
+
+            if(arr[6].compareTo("null")!=0){
+                days_found.add("Thursday");
+            }
+
+            if(arr[8].compareTo("null")!=0){
+                days_found.add("Friday");
+            }
+
+            if(arr[10].compareTo("null")!=0){
+                days_found.add("Saturday");
+            }
+
+            if(arr[12].compareTo("null")!=0){
+                days_found.add("Sunday");
+            }
+
+            for(int i=0; i<14; i+=2){
+                if(arr[i].compareTo("null")!=0){
+                    start_times_found.add(arr[i]);
+                }
+            }
+
+            for(int i=1; i<14; i+=2){
+                if(arr[i].compareTo("null")!=0){
+                    end_times_found.add(arr[i]);
+                }
+            }
+
+
+        }
+        ArrayList<String> list_days_of_week = new ArrayList<>();
+        ArrayList<String> list_start_hours_of_day = new ArrayList<>();
+        ArrayList<String> list_end_hours_of_day = new ArrayList<>();
+
+        list_days_of_week.addAll(days_found);
+        list_days_of_week.add(0,"N/A");
+
+        list_start_hours_of_day.addAll(start_times_found);
+        list_start_hours_of_day.add(0,"N/A");
+
+        list_end_hours_of_day.addAll(end_times_found);
+        list_end_hours_of_day.add(0,"N/A");
+
+        string_days_of_week = list_days_of_week.toArray(new String[list_days_of_week.size()]);
+
+        string_start_hours_of_day = list_start_hours_of_day.toArray(new String[list_start_hours_of_day.size()]);
+
+        string_end_hours_of_day = list_end_hours_of_day.toArray(new String[list_end_hours_of_day.size()]);
+
+
+        drop_downs.get("day_of_week").setVisible(false);
+        pane.remove(drop_downs.get("day_of_week"));
+        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
+
+        drop_downs.get("start_time").setVisible(false);
+        pane.remove(drop_downs.get("start_time"));
+        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
+
+        drop_downs.get("end_time").setVisible(false);
+        pane.remove(drop_downs.get("end_time"));
+        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
+
+
+    }
+
+
+
+
 
 }
