@@ -14,6 +14,17 @@ public class Populate {
 
     JDBCHandler jdbc_handler;
 
+    private String[] mbc = {
+            "Active Life", "Arts and Entertainment", "Automotive", "Car Rental", "Cafe",
+            "Beauty and Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
+            "Department Stores", "Education", "Event Planning and Services", "Flowers and Gifts",
+            "Food", "Health and Medical", "Home Services", "Home and Garden", "Hospitals", "Hotels and Travel",
+            "Hardware Stores", "Grocery", "medical Centers", "Nurseries and Gardening", "Nightlife",
+            "Restaurants", "Shopping", "Transportation"
+    };
+
+    private ArrayList<String> main_business_categories = new ArrayList<>(Arrays.asList(mbc));
+
     public static void main(String[] args) { //TODO CHECK THE INPUTS TO HAVE THE 4 json files
         JDBCHandler jdbc_handler = new JDBCHandler();
 
@@ -22,19 +33,38 @@ public class Populate {
 //        reader.view_all_file_keys();
 
         //The Order matters here! Look at createdb so see the dependencies (foreign keys)
-        reader.read_json_file("yelp_business.json");
-        reader.read_json_file("yelp_user.json");
-        reader.read_json_file("yelp_review.json");
-        reader.read_json_file("yelp_checkin.json");
+
+        //TODO REMOVE THIS LINE
+        args = new String[]{"yelp_business.json"};
+
+        // Populates Business Table
+        if (Arrays.asList(args).contains("yelp_business.json")) {
+            System.out.println("Populating Business Table");
+            reader.read_json_file("yelp_business.json");
+        }
+
+        if (Arrays.asList(args).contains("yelp_user.json")) {
+            System.out.println("Populating YelpUser Table");
+            reader.read_json_file("yelp_user.json");
+        }
+
+        if (Arrays.asList(args).contains("yelp_review.json")) {
+            System.out.println("Populating Review Table");
+            reader.read_json_file("yelp_review.json");
+        }
+
+        if (Arrays.asList(args).contains("yelp_checkin.json")) {
+            reader.read_json_file("yelp_checkin.json");
+        }
 
         jdbc_handler.closeConnection();
     }
 
-    public Populate(JDBCHandler jdbc_handler){
+    public Populate(JDBCHandler jdbc_handler) {
         this.jdbc_handler = jdbc_handler;
     }
 
-    private void view_all_file_keys(){
+    private void view_all_file_keys() {
         System.out.println("---------------------- Yelp Business Keys----------------------");
         view_json_object_keys("yelp_business.json");
 
@@ -51,15 +81,15 @@ public class Populate {
     /**
      * IMPORTANT: File Path & directory matters!
      * Takes in one of four files:
-     *    yelp_business.json
-     *    yelp_review.json
-     *    yelp_checkin.json
-     *    yelp_user.json
+     * yelp_business.json
+     * yelp_review.json
+     * yelp_checkin.json
+     * yelp_user.json
      * These files should be in folder "YelpDataset" at the root of the project (equivalent with src folder)
-     *
+     * <p>
      * This will read the file line by line and write it into the database
      */
-    private void read_file(){
+    private void read_file() {
 
         JSONParser parser = new JSONParser();
         try {
@@ -78,46 +108,47 @@ public class Populate {
 //                System.out.println(overall);
             }
             fileReader.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         System.exit(0);
     }
 
 
-
     //[Has TV, Coat Check, Open 24 Hours, Accepts Insurance, Alcohol, Dogs Allowed, Caters, Price Range, Happy Hour, Good for Kids, Good For Dancing, Outdoor Seating, Good For Kids, Takes Reservations, Waiter Service, Wi-Fi, Good For, Parking, Hair Types Specialized In, Drive-Thru, Order at Counter, Accepts Credit Cards, BYOB/Corkage, Good For Groups, Noise Level, By Appointment Only, Take-out, Wheelchair Accessible, BYOB, Music, Attire, Payment Types, Delivery, Ambience, Dietary Restrictions, Corkage, Ages Allowed, Smoking]
+
     /**
      * IMPORTANT: File Path & directory matters!
      * Takes in one of four files:
-     *    yelp_business.json
-     *    yelp_review.json
-     *    yelp_checkin.json
-     *    yelp_user.json
+     * yelp_business.json
+     * yelp_review.json
+     * yelp_checkin.json
+     * yelp_user.json
      * These files should be in folder "YelpDataset" at the root of the project (equivalent with src folder)
-     *
+     * <p>
      * This will read the file line by line and write it into the database
+     *
      * @param file_name
      */
-    private void read_json_file(String file_name){
+    private void read_json_file(String file_name) {
 
         JSONParser parser = new JSONParser();
         try {
-            File file = new File("YelpDataset/"+ file_name);
+            File file = new File("YelpDataset/" + file_name);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 JSONObject jsonObj = (JSONObject) parser.parse(line);
-                if(file_name.equals("yelp_business.json")){
+                if (file_name.equals("yelp_business.json")) {
                     insert_to_business(jsonObj);
-                }else if (file_name.equals("yelp_checkin.json")){
+                } else if (file_name.equals("yelp_checkin.json")) {
                     insert_to_checkin(jsonObj);
-                }else if (file_name.equals("yelp_review.json")){
+                } else if (file_name.equals("yelp_review.json")) {
                     insert_to_review(jsonObj);
-                }else if (file_name.equals("yelp_user.json")){
+                } else if (file_name.equals("yelp_user.json")) {
                     insert_to_user(jsonObj);
-                }else {
+                } else {
                     throw new Exception("json file not found");
                 }
 //                break;  //TODO REMOVE ME REMOVE ME REMOVE ME REMOVE ME REMOVE ME REMOVE ME REMOVE ME REMOVE ME REMOVE ME
@@ -129,7 +160,7 @@ public class Populate {
             e.printStackTrace();
         } catch (ParseException e) {
             e.printStackTrace();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -137,19 +168,20 @@ public class Populate {
     /**
      * IMPORTANT: File Path & directory matters!
      * Takes in one of four files:
-     *    yelp_business.json
-     *    yelp_review.json
-     *    yelp_checkin.json
-     *    yelp_user.json
+     * yelp_business.json
+     * yelp_review.json
+     * yelp_checkin.json
+     * yelp_user.json
      * These files should be in folder "YelpDataset" at the root of the project (equivalent with src folder)
-     *
+     * <p>
      * This will read the first entry (line) of the file and output the keys
+     *
      * @param file_name
      */
     private void view_json_object_keys(String file_name) {
         JSONParser parser = new JSONParser();
         try {
-            File file = new File("YelpDataset/"+ file_name);
+            File file = new File("YelpDataset/" + file_name);
             FileReader fileReader = new FileReader(file);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String line = bufferedReader.readLine();
@@ -168,27 +200,37 @@ public class Populate {
     /**
      * This will return the input with as a string surrounded by quotes
      * i.e.
-     *      input: hello world
-     *      output: "hello world"
+     * input: hello world
+     * output: "hello world"
      * this will be primarily used with inserting values into the database to explicitly note a value as a string
      */
-    private String add_quotes(String s){
+    private String add_quotes(String s) {
         return "'" + sanitize_string(s) + "'";
     }
 
-    private String remove_last_character(String s){
+    private String remove_last_character(String s) {
         return s.substring(0, s.length() - 1);
     }
 
-    private String sanitize_string(String s){
+    private String sanitize_string(String s) {
         s = s.replaceAll("[\n\r]", " ");
-        s =  s.replaceAll("'", "");
+        s = s.replaceAll("'", "");
         return s.replaceAll("&", "and"); //TODO & Symbols don't work during inserts into DB
+    }
+
+    private Boolean isBusinessCategory(String s) {
+//        if (main_business_categories.contains(s)) {
+//            return "true";
+//        } else {
+//            return "false";
+//        }
+        return main_business_categories.contains(s);
     }
 
 
     /**
      * This will covert the json object into an equivalent Database Query Insert String
+     *
      * @param entry : "line" of the json input file
      * @return Database Query INSERT String
      */
@@ -207,20 +249,20 @@ public class Populate {
         String[] votes_fields_result = new String[vote_fields.size()];
         String[] compliments_fields_result = new String[compliment_fields.size()];
 
-        for(int i=0; i<fields.size(); i++){
+        for (int i = 0; i < fields.size(); i++) {
 //            System.out.println(fields.get(i) + entry.get(fields.get(i)));
             fields_result[i] = entry.get(fields.get(i)).toString();
         }
 
-        for(int i=0; i<vote_fields.size(); i++){
+        for (int i = 0; i < vote_fields.size(); i++) {
 //            System.out.println(vote_fields.get(i) + votes.get(vote_fields.get(i)));
             votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
         }
 
-        for(int i=0; i<compliment_fields.size(); i++){
+        for (int i = 0; i < compliment_fields.size(); i++) {
             try {
                 compliments_fields_result[i] = compliments.get(compliment_fields.get(i)).toString();
-            }catch (Exception e){
+            } catch (Exception e) {
                 compliments_fields_result[i] = "0";
             }
         }
@@ -286,6 +328,7 @@ public class Populate {
 
     /**
      * This will covert the json object into an equivalent Database Query Insert String
+     *
      * @param entry : "line" of the json input file
      * @return Database Query INSERT String
      */
@@ -295,7 +338,7 @@ public class Populate {
                 "stars", "type", "open");
 
         List<String> hours_fields = Arrays.asList("mon_open", "mon_close", "tue_open", "tue_close", "wed_open", "wed_close", "thu_open",
-                "thu_close","fri_open","fri_close","sat_open","sat_close", "sun_open", "sun_close");
+                "thu_close", "fri_open", "fri_close", "sat_open", "sat_close", "sun_open", "sun_close");
 
         JSONObject hours = (JSONObject) entry.get("hours");
         JSONObject[] day_of_week = new JSONObject[7];
@@ -315,19 +358,19 @@ public class Populate {
         String[] fields_result = new String[fields.size()];
         ArrayList<String> hour_fields_result = new ArrayList<>();
 
-        for(int i=0; i<fields.size(); i++){
+        for (int i = 0; i < fields.size(); i++) {
             fields_result[i] = entry.get(fields.get(i)).toString();
         }
 
-        for(int i=0; i<day_of_week.length; i++){
+        for (int i = 0; i < day_of_week.length; i++) {
             try {
                 hour_fields_result.add((day_of_week[i].get("open").toString()));
-            }catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 hour_fields_result.add("null");
             }
             try {
                 hour_fields_result.add((day_of_week[i].get("close").toString()));
-            }catch (NullPointerException e){
+            } catch (NullPointerException e) {
                 hour_fields_result.add("null");
             }
         }
@@ -368,7 +411,7 @@ public class Populate {
         insert_string += add_quotes(fields_result[fields.indexOf("open")]);
         insert_string += ",";
 
-        for (String s : hour_fields_result){
+        for (String s : hour_fields_result) {
             insert_string += add_quotes(s);
             insert_string += ",";
         }
@@ -383,12 +426,11 @@ public class Populate {
         insert_to_business_categories(fields_result[fields.indexOf("business_id")], categories);
 
 
-
         return insert_string;
     }
 
 
-    private void insert_to_business_attributes(String business_id, JSONObject entry){
+    private void insert_to_business_attributes(String business_id, JSONObject entry) {
         for (Object key : entry.keySet()) {
             String insert_string = "INSERT INTO Attributes VALUES(";
             insert_string += add_quotes(business_id);
@@ -404,13 +446,20 @@ public class Populate {
 
     }
 
-    private void insert_to_business_categories(String business_id, JSONArray entry){
+    private void insert_to_business_categories(String business_id, JSONArray entry) {
+        String table_name = "";
         for (Object s : entry) {
-            String insert_string = "INSERT INTO Categories VALUES(";
+            if(isBusinessCategory(s.toString())) {
+                table_name = "MainCategories";
+            }else{
+                table_name = "SubCategories";
+            }
+            String insert_string = "INSERT INTO "+table_name+" VALUES(";
             insert_string += add_quotes(business_id);
             insert_string += ",";
             insert_string += add_quotes(s.toString());
             insert_string += ")";
+
 
             System.out.println(insert_string);
             System.out.println(jdbc_handler.makeUpdateQuery(insert_string));
@@ -421,6 +470,7 @@ public class Populate {
 
     /**
      * This will covert the json object into an equivalent Database Query Insert String
+     *
      * @param entry : "line" of the json input file
      * @return Database Query INSERT String
      */
@@ -434,12 +484,12 @@ public class Populate {
         String[] fields_result = new String[fields.size()];
         String[] votes_fields_result = new String[vote_fields.size()];
 
-        for(int i=0; i<fields.size(); i++){
+        for (int i = 0; i < fields.size(); i++) {
 //            System.out.println(fields.get(i) + entry.get(fields.get(i)));
             fields_result[i] = entry.get(fields.get(i)).toString();
         }
 
-        for(int i=0; i<vote_fields.size(); i++){
+        for (int i = 0; i < vote_fields.size(); i++) {
 //            System.out.println(vote_fields.get(i) + votes.get(vote_fields.get(i)));
             votes_fields_result[i] = votes.get(vote_fields.get(i)).toString();
         }
@@ -485,6 +535,7 @@ public class Populate {
 
     /**
      * This will covert the json object into an equivalent Database Query Insert String
+     *
      * @param entry : "line" of the json input file
      * @return Database Query INSERT String
      */
@@ -495,7 +546,7 @@ public class Populate {
 
         //TODO CHECKIN INFO?????
 
-        for(int i=0; i<fields.size(); i++){
+        for (int i = 0; i < fields.size(); i++) {
             fields_result[i] = entry.get(fields.get(i)).toString();
         }
 

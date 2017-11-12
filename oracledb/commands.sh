@@ -15,7 +15,7 @@ lsnrctl services ORCLCDB   # Checks your particular db
 
 # Enter SQL CLI
 sqlplus / as sysdba   # This should be used the first time you start up the container
-sqlplus admin/admin   # Used after you created the admin user
+d   # Used after you created the admin user
 
 # Queries
 SELECT tablespace_name, table_name from user_tables;

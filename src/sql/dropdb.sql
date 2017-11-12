@@ -6,7 +6,8 @@
 DROP TABLE Review;
 DROP TABLE CheckIn;
 DROP TABLE Neighborhoods;
-DROP TABLE Categories;
+DROP TABLE MainCategories;
+DROP TABLE SubCategories;
 DROP TABLE Attributes;
 DROP TABLE Business;
 DROP TABLE Elite;
