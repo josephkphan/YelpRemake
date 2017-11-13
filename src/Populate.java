@@ -46,6 +46,7 @@ public class Populate {
 
         //The Order matters here! Look at createdb so see the dependencies (foreign keys)
 
+        // execute example java Populate yelp_business.json yelp_user.json yelp_review.json yelp_checkin.json
         args = new String[]{"yelp_business.json","yelp_user.json","yelp_review.json","yelp_checkin.json"};
 
         // Populates Business Table
