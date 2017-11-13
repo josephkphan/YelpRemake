@@ -22,7 +22,12 @@ The SQL Prompt should now appear : SQL> \
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `GRANT CREATE SESSION TO admin;`\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; `GRANT ANY PRIVILEGE TO admin;`
 
-Your Databse should be ready to go! 
+Your Database should be ready to go! 
+
+## Accessing your Database CLI 
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `docker exec -ti oracledb_database_1 sh` \
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `sqlplus admin/admin `
+
 
 ## Populating the Database 
 First go into the container and create some tables. (feel free to copy the createdb.sql in the src/sql directory)\
