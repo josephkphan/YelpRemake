@@ -10,6 +10,7 @@ public class JDBCHandler {
 
     private Connection connection = null;
     private Statement statement = null;
+    private PreparedStatement prepared_statement = null;
 
     //Constructor
 
@@ -51,6 +52,15 @@ public class JDBCHandler {
     public Statement getStatement() {
         return statement;
     }
+
+    public PreparedStatement getPreparedStatement(String string){
+        try {
+            return connection.prepareStatement(string);
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+    };
 
 
     //Other Methods

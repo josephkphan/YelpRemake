@@ -15,11 +15,6 @@ CREATE TABLE YelpUser (
     review_count NUMBER,
     type VARCHAR(100),
     fans NUMBER,
-    c_note NUMBER,   -- c for compliments
-    c_plain NUMBER,
-    c_cool NUMBER,
-    c_hot NUMBER,
-    c_funny NUMBER,
     v_cool NUMBER,    -- v for votes
     v_useful NUMBER,
     v_funny NUMBER
@@ -97,7 +92,7 @@ CREATE TABLE Review(
     v_useful NUMBER,
     v_funny NUMBER,
     stars FLOAT,
-    text VARCHAR(2000),
+    text VARCHAR(4000),
     type VARCHAR(100),
     user_id VARCHAR(100),
     business_id VARCHAR(100),
