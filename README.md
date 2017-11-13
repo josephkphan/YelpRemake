@@ -1,12 +1,18 @@
 
 # Yelp Database Project
 
+## Prereqs
+- Docker 
+- Docker-compose
 
 ## Starting Up the Database
 Following Oracle instructions, I have created a docker image of a oracle database.
 Pull and run this oracle image by doing the following commands:\
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `cd oracledb` \
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `docker-compose up -d`\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `docker-compose up -d`
+
+Check if the oracle database is running\
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   `docker ps`
 
 It will take roughly 10-20 minutes to download the image and start it up. 
 If you run into any problems. starting the image check to see if the directories in the 'Volume' exist and it has 
@@ -44,6 +50,6 @@ The GUI is interface to query the database. To start the GUI run the following c
 - YelpDataset (should be in in project root directory).
 
 
-## Screenshot
-![alt text](https://photos.app.goo.gl/2MJgzYe2Vq9ty9Mq2)
 
+## Screenshot
+![alt text](https://raw.githubusercontent.com/josephkphan/swingtest/master/images/screenshot1.png)
