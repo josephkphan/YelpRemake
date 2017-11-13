@@ -44,4 +44,6 @@ The GUI is interface to query the database. To start the GUI run the following c
 - YelpDataset (should be in in project root directory).
 
 
+## Screenshot
+![alt text](https://photos.app.goo.gl/2MJgzYe2Vq9ty9Mq2)
 
