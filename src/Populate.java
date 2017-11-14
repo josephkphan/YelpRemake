@@ -47,6 +47,7 @@ public class Populate {
         //The Order matters here! Look at createdb so see the dependencies (foreign keys)
 
         // execute example java Populate yelp_business.json yelp_user.json yelp_review.json yelp_checkin.json
+//        args = new String[]{"yelp_business.json"};
         args = new String[]{"yelp_business.json","yelp_user.json","yelp_review.json","yelp_checkin.json"};
 
         // Populates Business Table
@@ -277,7 +278,7 @@ public class Populate {
                     System.out.println("EXCEPTION insert_to_business: " + e.getMessage());
                 }
 
-                insert_to_business_attributes(fields_result[fields.indexOf("business_id")], attributes);
+                insert_to_business_attributes(fields_result[fields.indexOf("business_id")], attributes, "");
                 insert_to_business_categories(fields_result[fields.indexOf("business_id")], categories);
             }
             fileReader.close();
@@ -299,15 +300,20 @@ public class Populate {
     }
 
 
-    private void insert_to_business_attributes(String business_id, JSONObject entry) {
+    private void insert_to_business_attributes(String business_id, JSONObject entry, String prefix) {
         try {
             for (Object key : entry.keySet()) {
-
-                attribute_statement.setString(1, sanitize_string(business_id));
-                attribute_statement.setString(2, sanitize_string(key.toString()));
-                attribute_statement.setString(3, sanitize_string(entry.get(key).toString()));
-                attribute_statement.addBatch();
-                writeBatch(attribute_statement, "attribute", false);
+//                System.out.println(prefix + sanitize_string(key.toString()));
+//                System.out.println(entry.get(key).toString());
+                if(entry.get(key).toString().contains("{")){
+                    insert_to_business_attributes(business_id,(JSONObject)entry.get(key),key.toString());
+                }else {
+                    attribute_statement.setString(1, sanitize_string(business_id));
+                    attribute_statement.setString(2, prefix +" "+ sanitize_string(key.toString()) + entry.get(key).toString());
+                    attribute_statement.setString(3, sanitize_string(entry.get(key).toString()));
+                    attribute_statement.addBatch();
+                    writeBatch(attribute_statement, "attribute", false);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
