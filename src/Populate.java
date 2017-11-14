@@ -48,7 +48,7 @@ public class Populate {
 
         // execute example java Populate yelp_business.json yelp_user.json yelp_review.json yelp_checkin.json
 //        args = new String[]{"yelp_business.json"};
-        args = new String[]{"yelp_business.json","yelp_user.json","yelp_review.json","yelp_checkin.json"};
+        args = new String[]{"yelp_business.json", "yelp_user.json", "yelp_review.json", "yelp_checkin.json"};
 
         // Populates Business Table
         if (Arrays.asList(args).contains("yelp_business.json")) {
@@ -96,10 +96,10 @@ public class Populate {
         s = s.replaceAll("[\n\r]", " ");
         s = s.replaceAll("'", "");
         s = s.replaceAll("&", "and");// & Symbols don't work during inserts into DB
-        if(s.length()>3000) {
+        if (s.length() > 3000) {
             s = s.substring(0, 2500); //For Text Cap
         }
-        return s;
+        return s.trim();
     }
 
     private void writeBatch(PreparedStatement statement, String batch_key, boolean forceWrite) throws Exception {
@@ -305,11 +305,11 @@ public class Populate {
             for (Object key : entry.keySet()) {
 //                System.out.println(prefix + sanitize_string(key.toString()));
 //                System.out.println(entry.get(key).toString());
-                if(entry.get(key).toString().contains("{")){
-                    insert_to_business_attributes(business_id,(JSONObject)entry.get(key),key.toString());
-                }else {
+                if (entry.get(key).toString().contains("{")) {
+                    insert_to_business_attributes(business_id, (JSONObject) entry.get(key), key.toString());
+                } else {
                     attribute_statement.setString(1, sanitize_string(business_id));
-                    attribute_statement.setString(2, prefix +" "+ sanitize_string(key.toString()) + entry.get(key).toString());
+                    attribute_statement.setString(2, sanitize_string(prefix + " " + sanitize_string(key.toString()) + " " + entry.get(key).toString()));
                     attribute_statement.setString(3, sanitize_string(entry.get(key).toString()));
                     attribute_statement.addBatch();
                     writeBatch(attribute_statement, "attribute", false);
@@ -324,7 +324,7 @@ public class Populate {
     private void insert_to_business_categories(String business_id, JSONArray entry) {
         try {
             for (Object s : entry) {
-                if (isMainBusinessCategory(s.toString())) {
+                if (isMainBusinessCategory(sanitize_string(s.toString()))) {
                     main_category_statement.setString(1, sanitize_string(business_id));
                     main_category_statement.setString(2, sanitize_string(s.toString()));
                     main_category_statement.addBatch();
@@ -337,7 +337,7 @@ public class Populate {
                     writeBatch(sub_category_statement, "sub_category", false);
                 }
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("EXCEPTION insert_to_business_categories: " + e.getMessage());
         }
@@ -429,7 +429,6 @@ public class Populate {
                 for (int i = 0; i < fields.size(); i++) {
                     fields_result[i] = sanitize_string(entry.get(fields.get(i)).toString());
                 }
-
                 try {
                     check_in_statement.setString(1, fields_result[fields.indexOf("business_id")]);
                     check_in_statement.setString(2, fields_result[fields.indexOf("type")]);
@@ -443,7 +442,7 @@ public class Populate {
             }
             fileReader.close();
             writeBatch(check_in_statement, "check_in", true);
-        }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

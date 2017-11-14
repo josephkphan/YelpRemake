@@ -256,6 +256,8 @@ public class Home extends JFrame implements ActionListener {
                     search_query += ")";
                 }
 
+                search_query += time_check_string();
+
                 // Querying Database
                 ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 4);
                 System.out.println(Arrays.toString(data));
@@ -275,14 +277,10 @@ public class Home extends JFrame implements ActionListener {
                 System.out.println(data_ids.toString());
                 System.out.println("--------------------");
                 System.out.println(schedule.toString());
-//                if (
-//                        day_of_week.compareTo("N/A") == 0 &&
-//                                start_time.compareTo("N/A") == 0 &&
-//                                start_time.compareTo("N/A") == 0 &&
-//                                search_attribute.compareTo("N/A") == 0)
+                if (day_of_week.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0)
                     updateFilterDropDowns();
 
-                filterByTime();
+//                filterByTime();
 
             }
         }
@@ -324,7 +322,7 @@ public class Home extends JFrame implements ActionListener {
             System.out.println(drop_downs.get("attributes").getSelectedItem());
             Boolean changed = search_attribute.compareTo(drop_downs.get("attributes").getSelectedItem().toString()) != 0;
             search_attribute = drop_downs.get("attributes").getSelectedItem().toString();
-            if (changed){
+            if (changed) {
                 clearGUI();
             }
         }
@@ -372,6 +370,7 @@ public class Home extends JFrame implements ActionListener {
 
 
                 sub_business_categories = temp.toArray(new String[temp.size()]);
+                Arrays.sort(sub_business_categories);
 
                 System.out.println("SubCategories Size: " + temp.size());
 
@@ -389,30 +388,39 @@ public class Home extends JFrame implements ActionListener {
 
         @Override
         public void run() {
-            attributes_set.clear();
-            String search_query = "SELECT DISTINCT(att.attribute)so FROM Attributes att JOIN ";
-            search_query +=
-                    "( SELECT b.business_id as b_id, mc.category as mc_category, sc.category as sc_category " +
-                            "FROM Business b " +
-                            "INNER JOIN MainCategories mc ON b.business_id=mc.business_id " +
-                            "INNER JOIN SubCategories sc ON b.business_id=sc.business_id ";
+            if (subcategory_set.size() == 0){
+                attributes_set.clear();
+                scroll_panes.get("attributes").setVisible(false);
+                pane.remove(scroll_panes.get("attributes"));
+                scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
+
+            }else if (main_category_set.size() != 0) {
+                attributes_set.clear();
+                String search_query = "SELECT DISTINCT(att.attribute)so FROM Attributes att JOIN ";
+                search_query +=
+                        "( SELECT b.business_id as b_id, mc.category as mc_category, sc.category as sc_category " +
+                                "FROM Business b " +
+                                "INNER JOIN MainCategories mc ON b.business_id=mc.business_id " +
+                                "INNER JOIN SubCategories sc ON b.business_id=sc.business_id ";
 
 
-            if (main_category_set.size() != 0) {
                 search_query += "WHERE (";
-            }
+                search_query += createCategoriesString();
+                search_query += ")";
 
-            search_query += createCategoriesString(); // TODO CHECK THIS
+                // Adding Sub Categories Where Conditions
+                if (subcategory_set.size() > 0) {
+                    search_query += " AND (";
+                    search_query += createSubcategoriesString();
+                    search_query += ")";
+                }
 
-            search_query += ") AND (";
+                search_query += ")query  ON query.b_id=att.business_id";
 
-            search_query += createSubcategoriesString();
-
-            search_query += ") )query  ON query.b_id=att.business_id";
-
-            ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 1);
-            String[] string_results = jdbc_handler.arrayListToStringArray(results);
-            attributes = string_results;
+                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 1);
+                String[] string_results = jdbc_handler.arrayListToStringArray(results);
+                attributes = string_results;
+                Arrays.sort(attributes);
 //            System.out.println(Arrays.toString(string_results));
 //
 //            Set<String> temp = new HashSet<>(Arrays.asList(string_results));
@@ -421,12 +429,13 @@ public class Home extends JFrame implements ActionListener {
 //
 //            attributes = temp.toArray(new String[temp.size()]);
 
-            System.out.println(Arrays.toString(attributes));
-            System.out.println("Attribute Size: " + attributes.length);
+                System.out.println("Attribute Size: " + attributes.length);
 
-            scroll_panes.get("attributes").setVisible(false);
-            pane.remove(scroll_panes.get("attributes"));
-            scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
+                scroll_panes.get("attributes").setVisible(false);
+                pane.remove(scroll_panes.get("attributes"));
+                scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
+
+            }
         }
     };
 
@@ -475,7 +484,7 @@ public class Home extends JFrame implements ActionListener {
             string += " mc.category=";
             string += addQuotes(str);
             if (counter++ != main_category_set.size() - 1) {
-                string += " "+search_attribute+" ";
+                string += " " + search_attribute + " ";
             }
         }
         return string;
@@ -488,7 +497,7 @@ public class Home extends JFrame implements ActionListener {
             string += " sc.category=";
             string += addQuotes(str);
             if (counter++ != subcategory_set.size() - 1) {
-                string += " "+search_attribute+" ";
+                string += " " + search_attribute + " ";
             }
         }
         return string;
@@ -501,7 +510,7 @@ public class Home extends JFrame implements ActionListener {
             string += " a.attribute=";
             string += addQuotes(str);
             if (counter++ != attributes_set.size() - 1) {
-                string += " "+search_attribute+" ";
+                string += " " + search_attribute + " ";
             }
         }
         return string;
@@ -708,7 +717,7 @@ public class Home extends JFrame implements ActionListener {
 
     }
 
-    private void clearGUI(){
+    private void clearGUI() {
 
         data = new Object[0][0];
         data_arraylist.clear();
@@ -755,6 +764,54 @@ public class Home extends JFrame implements ActionListener {
         pane.remove(scroll_panes.get("results"));
         scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
 
+    }
+
+    private String time_check_string() {
+        String day = "";
+        switch (day_of_week) {
+            case "Monday":
+                day = "mon";
+                break;
+            case "Tuesday":
+                day = "tue";
+                break;
+            case "Wednesday":
+                day = "wed";
+                break;
+            case "Thursday":
+                day = "thu";
+                break;
+            case "Friday":
+                day = "fri";
+                break;
+            case "Saturday":
+                day = "sat";
+                break;
+            case "Sunday":
+                day = "sun";
+                break;
+            default:
+                return "";
+        }
+        String filter = "";
+        if (day_of_week.compareTo("N/A") != 0 && start_time.compareTo("N/A") != 0 && end_time.compareTo("N/A") != 0) {
+            // BETWEEN
+            filter = " AND " + singleQuotes(start_time) + " >= " + "b." + day + "_open" + " AND " + singleQuotes(end_time) + " <= " + "b." + day + "_close" + " AND  b." + day + "_open not like '%null%'" + " AND  b." + day + "_close not like '%null%'";
+        } else if (day_of_week.compareTo("N/A") != 0 && start_time.compareTo("N/A") != 0) {
+            // String comparison
+            filter = " AND " + singleQuotes(start_time) + " >= " + "b." + day + "_open" + " AND  b." + day + "_open not like '%null%'";
+        } else if (day_of_week.compareTo("N/A") != 0 && end_time.compareTo("N/A") != 0) {
+            // String Comparison
+            filter = " AND " + singleQuotes(end_time) + " <= " + "b." + day + "_close" + " AND  b." + day + "_close not like '%null%'";
+        } else {
+            filter = " AND  b." + day + "_open not like '%null%'";
+        }
+
+        return filter;
+    }
+
+    private String singleQuotes(String s) {
+        return "'" + s + "'";
     }
 
 }
