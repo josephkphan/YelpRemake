@@ -105,6 +105,7 @@ CREATE TABLE CheckIn (
     business_id VARCHAR(100),
     type VARCHAR(100),
     checkin_info VARCHAR(2000),  --TODO HOW AM I GOING TO DISPLAY THIS SHIT?
+    total NUMBER,
     FOREIGN KEY (business_id) REFERENCES Business(business_id)
 );
 

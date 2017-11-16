@@ -4,7 +4,7 @@ import javax.swing.*;
 /**
  * Main method used to Test Code
  */
-public class  Main {
+public class HW3 {
     public static void main(String[] args) {
 
         // Run the GUI codes on Event-Dispatching thread for thread safety

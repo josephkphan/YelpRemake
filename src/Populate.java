@@ -26,7 +26,7 @@ public class Populate {
     private static final String insert_main_categories_string = "INSERT INTO MainCategories VALUES (?,?)";
     private static final String insert_sub_categories_string = "INSERT INTO SubCategories VALUES (?,?)";
     private static final String insert_review_string = "INSERT INTO Review VALUES (?,?,?,?,?,?,?,?,?,?)";
-    private static final String insert_check_in_string = "INSERT INTO CheckIn VALUES (?,?,?)";
+    private static final String insert_check_in_string = "INSERT INTO CheckIn VALUES (?,?,?,?)";
 
     PreparedStatement business_statement, user_statement, attribute_statement, main_category_statement,
             sub_category_statement, review_statement, check_in_statement;
@@ -47,26 +47,27 @@ public class Populate {
         //The Order matters here! Look at createdb so see the dependencies (foreign keys)
 
         // execute example java Populate yelp_business.json yelp_user.json yelp_review.json yelp_checkin.json
-//        args = new String[]{"yelp_business.json"};
+//        args = new String[]{"yelp_checkin.json"};
         args = new String[]{"yelp_business.json", "yelp_user.json", "yelp_review.json", "yelp_checkin.json"};
 
         // Populates Business Table
         if (Arrays.asList(args).contains("yelp_business.json")) {
-            System.out.println("Populating Business Table");
+            System.out.println("Populating Tables: Business, MainCategories, SubCategories, Attributes");
             reader.insert_to_business("yelp_business.json");
         }
 
         if (Arrays.asList(args).contains("yelp_user.json")) {
-            System.out.println("Populating YelpUser Table");
+            System.out.println("Populating Table: YelpUser");
             reader.insert_to_user("yelp_user.json");
         }
 
         if (Arrays.asList(args).contains("yelp_review.json")) {
-            System.out.println("Populating Review Table");
+            System.out.println("Populating Table: Review");
             reader.insert_to_review("yelp_review.json");
         }
 
         if (Arrays.asList(args).contains("yelp_checkin.json")) {
+            System.out.println("Populating Table: CheckIn");
             reader.insert_to_checkin("yelp_checkin.json");
         }
 
@@ -429,11 +430,17 @@ public class Populate {
                 for (int i = 0; i < fields.size(); i++) {
                     fields_result[i] = sanitize_string(entry.get(fields.get(i)).toString());
                 }
+                int total_checkins = 0;
+                JSONObject checking_info = (JSONObject) entry.get("checkin_info");
+                for (Object key : checking_info.keySet()) {
+                    total_checkins +=  Integer.parseInt(checking_info.get(key).toString());
+                }
+
                 try {
                     check_in_statement.setString(1, fields_result[fields.indexOf("business_id")]);
                     check_in_statement.setString(2, fields_result[fields.indexOf("type")]);
                     check_in_statement.setString(3, fields_result[fields.indexOf("checkin_info")]);
-
+                    check_in_statement.setInt(4, total_checkins);
                     check_in_statement.addBatch();
                     writeBatch(check_in_statement, "check_in", false);
                 } catch (Exception e) {

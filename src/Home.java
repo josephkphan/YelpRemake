@@ -12,6 +12,11 @@ import java.util.*;
 
 public class Home extends JFrame implements ActionListener {
 
+
+    //***************************************************************************************************************//
+    //************************************************* CREATING DATA MEMBERS ***************************************//
+    //***************************************************************************************************************//
+
     JDBCHandler jdbc_handler;
 
     private static final int WINDOW_WIDTH = 1000;
@@ -56,13 +61,7 @@ public class Home extends JFrame implements ActionListener {
         Options -- right column i.e. price range
      */
 
-    //TODO THESE STRINGS SHOULD BE CREATED DYNAMICALLY
-    private String[] string_days_of_week = {"N/A", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-
-    private String[] string_hours_of_day =
-            {"N/A", "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "8:00", "09:00", "10:00", "11:00",
-                    "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"
-            };
+    private String[] string_days_of_week = {"N/A"};
 
     private String[] string_start_hours_of_day = {"N/A"};
 
@@ -145,6 +144,10 @@ public class Home extends JFrame implements ActionListener {
 
     }
 
+    //***************************************************************************************************************//
+    //************************************************* CREATING GUI ELEMENTS ***************************************//
+    //***************************************************************************************************************//
+
     /**
      *
      */
@@ -154,7 +157,9 @@ public class Home extends JFrame implements ActionListener {
         labels.put("day_of_week", GeneralJStuff.createLabel(pane, "Day of the Week", 50, 500));
         labels.put("start_time", GeneralJStuff.createLabel(pane, "From:", 200, 500));
         labels.put("end_time", GeneralJStuff.createLabel(pane, "To:", 350, 500));
-        labels.put("attributes", GeneralJStuff.createLabel(pane, "Search For:", 500, 500));
+        labels.put("attributes", GeneralJStuff.createLabel(pane, "Attributes Condition", 500, 500));
+//        labels.put("attributes", GeneralJStuff.createLabel(pane, "State", 500, 500));
+//        labels.put("attributes", GeneralJStuff.createLabel(pane, "City", 500, 500));
 
     }
 
@@ -213,7 +218,57 @@ public class Home extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
 
+        //***************************************************************************************************************//
+        //**************************************** CREATING RUNNABLES FOR GUI Drop Downs ********************************//
+        //***************************************************************************************************************//
+
     }
+
+    // Creating Drop Downs
+    Runnable r_day_of_week = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("day_of_week").getSelectedItem());
+            day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
+        }
+    };
+
+    Runnable r_start_time = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("start_time").getSelectedItem());
+            start_time = drop_downs.get("start_time").getSelectedItem().toString();
+        }
+    };
+    Runnable r_end_time = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("end_time").getSelectedItem());
+            if (drop_downs.get("end_time").getSelectedItem().toString().compareTo("00:00") == 0) {
+                end_time = "24:00";
+            } else {
+                end_time = drop_downs.get("end_time").getSelectedItem().toString();
+            }
+
+        }
+    };
+    Runnable r_attributes = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("attributes").getSelectedItem());
+            Boolean changed = search_attribute.compareTo(drop_downs.get("attributes").getSelectedItem().toString()) != 0;
+            search_attribute = drop_downs.get("attributes").getSelectedItem().toString();
+            //TODO DO SOMETHING HERE? if changed?
+//            if (changed) {
+//                clearGUI();
+//            }
+        }
+    };
+
+
+    //***************************************************************************************************************//
+    //********************************************* Runnables with DB Queries ***************************************//
+    //***************************************************************************************************************//
 
 
     /**
@@ -224,6 +279,7 @@ public class Home extends JFrame implements ActionListener {
         public void run() {
             if (main_category_set.size() == 0) {
                 System.out.println("Nothing Selected!");
+                clearAll();
             } else {
                 String search_query = "SELECT DISTINCT b.name, b.city, b.state, b.review_count " +
                         ", b.business_id, mon_open, mon_close, tue_open, tue_close, wed_open, wed_close " +
@@ -280,50 +336,6 @@ public class Home extends JFrame implements ActionListener {
                 if (day_of_week.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0)
                     updateFilterDropDowns();
 
-//                filterByTime();
-
-            }
-        }
-    };
-
-    // --------------------------------------- Runnables ---------------------------------------- //
-
-    // Creating Drop Downs
-    Runnable r_day_of_week = new Runnable() {
-        @Override
-        public void run() {
-            System.out.println(drop_downs.get("day_of_week").getSelectedItem());
-            day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
-        }
-    };
-
-    Runnable r_start_time = new Runnable() {
-        @Override
-        public void run() {
-            System.out.println(drop_downs.get("start_time").getSelectedItem());
-            start_time = drop_downs.get("start_time").getSelectedItem().toString();
-        }
-    };
-    Runnable r_end_time = new Runnable() {
-        @Override
-        public void run() {
-            System.out.println(drop_downs.get("end_time").getSelectedItem());
-            if (drop_downs.get("end_time").getSelectedItem().toString().compareTo("00:00") == 0) {
-                end_time = "24:00";
-            } else {
-                end_time = drop_downs.get("end_time").getSelectedItem().toString();
-            }
-
-        }
-    };
-    Runnable r_attributes = new Runnable() {
-        @Override
-        public void run() {
-            System.out.println(drop_downs.get("attributes").getSelectedItem());
-            Boolean changed = search_attribute.compareTo(drop_downs.get("attributes").getSelectedItem().toString()) != 0;
-            search_attribute = drop_downs.get("attributes").getSelectedItem().toString();
-            if (changed) {
-                clearGUI();
             }
         }
     };
@@ -336,17 +348,8 @@ public class Home extends JFrame implements ActionListener {
             attributes_set.clear();
             subcategory_set.clear();
             if (main_category_set.size() == 0) {
-                attributes = new String[0];
-                sub_business_categories = new String[0];
-
-                scroll_panes.get("sub_category").setVisible(false);
-                pane.remove(scroll_panes.get("sub_category"));
-                scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindTypes));
-
-                scroll_panes.get("attributes").setVisible(false);
-                pane.remove(scroll_panes.get("attributes"));
-                scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, queryFindTypes));
-
+                clearSubCategories();
+                clearAttributes();
             } else {
 
                 String search_query = "SELECT DISTINCT(sc.category) FROM SubCategories sc JOIN ";
@@ -376,9 +379,8 @@ public class Home extends JFrame implements ActionListener {
 
                 System.out.println(Arrays.toString(sub_business_categories));
 
-                scroll_panes.get("sub_category").setVisible(false);
-                pane.remove(scroll_panes.get("sub_category"));
-                scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindAttributes));
+                recreateSubCategories();
+
             }
         }
     };
@@ -388,13 +390,10 @@ public class Home extends JFrame implements ActionListener {
 
         @Override
         public void run() {
-            if (subcategory_set.size() == 0){
-                attributes_set.clear();
-                scroll_panes.get("attributes").setVisible(false);
-                pane.remove(scroll_panes.get("attributes"));
-                scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
+            if (subcategory_set.size() == 0) {
+                clearAttributes();
 
-            }else if (main_category_set.size() != 0) {
+            } else if (main_category_set.size() != 0) {
                 attributes_set.clear();
                 String search_query = "SELECT DISTINCT(att.attribute)so FROM Attributes att JOIN ";
                 search_query +=
@@ -421,20 +420,11 @@ public class Home extends JFrame implements ActionListener {
                 String[] string_results = jdbc_handler.arrayListToStringArray(results);
                 attributes = string_results;
                 Arrays.sort(attributes);
-//            System.out.println(Arrays.toString(string_results));
-//
-//            Set<String> temp = new HashSet<>(Arrays.asList(string_results));
-//            temp.removeAll(Arrays.asList(main_business_categories));
-//
-//
-//            attributes = temp.toArray(new String[temp.size()]);
+
 
                 System.out.println("Attribute Size: " + attributes.length);
 
-                scroll_panes.get("attributes").setVisible(false);
-                pane.remove(scroll_panes.get("attributes"));
-                scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
-
+                recreateAttributes();
             }
         }
     };
@@ -469,12 +459,9 @@ public class Home extends JFrame implements ActionListener {
         }
     };
 
-
-    // ------------------------- Miscellaneous ----------------------- //
-
-    private String addQuotes(String s) {
-        return "'" + (s) + "'";
-    }
+    //***************************************************************************************************************//
+    //***************************************** Query Making Helper Functions ***************************************//
+    //***************************************************************************************************************//
 
 
     private String createCategoriesString() {
@@ -514,125 +501,6 @@ public class Home extends JFrame implements ActionListener {
             }
         }
         return string;
-    }
-
-    private void filterByTime() {
-        /*schedule String array
-            0    mon_open VARCHAR(100),
-            1    mon_close VARCHAR(100),
-            2    tue_open VARCHAR(100),
-            3    tue_close VARCHAR(100),
-            4    wed_open VARCHAR(100),
-            5    wed_close VARCHAR(100),
-            6    thu_open VARCHAR(100),
-            7    thu_close VARCHAR(100),
-            8    fri_open VARCHAR(100),
-            9    fri_close VARCHAR(100),
-            10   sat_open VARCHAR(100),
-            11   sat_close VARCHAR(100),
-            12   sun_open VARCHAR(100),
-            13   sun_close VARCHAR (100)
-         */
-        System.out.println(day_of_week);
-        switch (day_of_week) {
-            case "Monday":
-                timeChecker(0, 1);
-                break;
-            case "Tuesday":
-                timeChecker(2, 3);
-                break;
-            case "Wednesday":
-                timeChecker(4, 5);
-                break;
-            case "Thursday":
-                timeChecker(6, 7);
-                break;
-            case "Friday":
-                timeChecker(8, 9);
-                break;
-            case "Saturday":
-                timeChecker(10, 11);
-                break;
-            case "Sunday":
-                timeChecker(12, 13);
-                break;
-        }
-
-    }
-
-
-    private void timeChecker(int open_index, int end_index) {
-        boolean passed_start_check, passed_end_check;
-        int s1, s2, e1, e2;
-        String[] arr;
-        for (int i = 0; i < schedule.size(); i++) {
-            arr = schedule.get(i);
-
-            System.out.print(arr[open_index] + "  " + arr[end_index]);
-
-            if (arr[end_index].compareTo("null") == 0 &&
-                    arr[open_index].compareTo("null") == 0) {
-                passed_start_check = false;
-                passed_end_check = false;
-            } else {
-
-                if (start_time.compareTo("N/A") == 0) {
-                    passed_start_check = true;
-                } else {
-                    s1 = timeToIntConverstion(start_time);
-                    if (arr[open_index].compareTo("null") == 0) {
-                        passed_start_check = false;
-                    } else {
-                        s2 = timeToIntConverstion(arr[open_index]);
-                        passed_start_check = (s2 <= s1);
-                    }
-                }
-
-                if (end_time.compareTo("N/A") == 0) {
-                    passed_end_check = true;
-                } else {
-                    e1 = timeToIntConverstion(end_time);
-                    if (arr[end_index].compareTo("null") == 0) {
-                        passed_end_check = false;
-                    } else {
-                        if (arr[end_index].compareTo("00:00") == 0) {
-                            arr[end_index] = "24:00";
-                        }
-                        e2 = timeToIntConverstion(arr[end_index]);
-
-                        passed_end_check = (e2 >= e1);
-                    }
-                }
-            }
-
-            if (!(passed_start_check && passed_end_check)) {
-                schedule.remove(i);
-                data_ids.remove(i);
-                data_arraylist.remove(i);
-                if (schedule.size() <= 0) {
-                    break;
-                }
-                i--;
-                System.out.println("DELETING ENTRY");
-            } else {
-                System.out.println("KEEPING ENTRY");
-
-            }
-        }
-        data = jdbc_handler.arrayListToObjectArray(data_arraylist);
-    }
-
-    private int timeToIntConverstion(String s) {
-        s = s.replaceAll(":", "");
-        s = s.replaceAll("AM", "");
-        s = s.replaceAll("PM", "");
-        return Integer.parseInt(s);
-    }
-
-
-    private String[] convertStringArrayListToArray(ArrayList<String> al) {
-        String[] arr = new String[al.size()];
-        return al.toArray(arr);
     }
 
     private void updateFilterDropDowns() {
@@ -696,75 +564,12 @@ public class Home extends JFrame implements ActionListener {
         list_end_hours_of_day.add(0, "N/A");
 
         string_days_of_week = list_days_of_week.toArray(new String[list_days_of_week.size()]);
-
         string_start_hours_of_day = list_start_hours_of_day.toArray(new String[list_start_hours_of_day.size()]);
-
         string_end_hours_of_day = list_end_hours_of_day.toArray(new String[list_end_hours_of_day.size()]);
 
-
-        drop_downs.get("day_of_week").setVisible(false);
-        pane.remove(drop_downs.get("day_of_week"));
-        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
-
-        drop_downs.get("start_time").setVisible(false);
-        pane.remove(drop_downs.get("start_time"));
-        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
-
-        drop_downs.get("end_time").setVisible(false);
-        pane.remove(drop_downs.get("end_time"));
-        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
-
-
+        recreateDropDowns();
     }
 
-    private void clearGUI() {
-
-        data = new Object[0][0];
-        data_arraylist.clear();
-        data_ids.clear();
-        subcategory_set.clear();
-        sub_business_categories = new String[0];
-        attributes_set.clear();
-        attributes = new String[0];
-
-
-        day_of_week = "N/A";
-        start_time = "N/A";
-        end_time = "N/A";
-
-        string_days_of_week = new String[]{"N/A", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-
-        string_start_hours_of_day = new String[]{"N/A"};
-
-        string_end_hours_of_day = new String[]{"N/A"};
-
-
-        drop_downs.get("day_of_week").setVisible(false);
-        pane.remove(drop_downs.get("day_of_week"));
-        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
-
-        drop_downs.get("start_time").setVisible(false);
-        pane.remove(drop_downs.get("start_time"));
-        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
-
-        drop_downs.get("end_time").setVisible(false);
-        pane.remove(drop_downs.get("end_time"));
-        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
-
-
-        scroll_panes.get("sub_category").setVisible(false);
-        pane.remove(scroll_panes.get("sub_category"));
-        scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindAttributes));
-
-        scroll_panes.get("attributes").setVisible(false);
-        pane.remove(scroll_panes.get("attributes"));
-        scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
-
-        scroll_panes.get("results").setVisible(false);
-        pane.remove(scroll_panes.get("results"));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
-
-    }
 
     private String time_check_string() {
         String day = "";
@@ -810,8 +615,112 @@ public class Home extends JFrame implements ActionListener {
         return filter;
     }
 
+
+    //***************************************************************************************************************//
+    //*********************************************** Random Helper Functions ***************************************//
+    //***************************************************************************************************************//
+
     private String singleQuotes(String s) {
         return "'" + s + "'";
+    }
+
+    private String addQuotes(String s) {
+        return "'" + (s) + "'";
+    }
+
+    private int timeToIntConverstion(String s) {
+        s = s.replaceAll(":", "");
+        s = s.replaceAll("AM", "");
+        s = s.replaceAll("PM", "");
+        return Integer.parseInt(s);
+    }
+
+    private String[] convertStringArrayListToArray(ArrayList<String> al) {
+        String[] arr = new String[al.size()];
+        return al.toArray(arr);
+    }
+
+    //***************************************************************************************************************//
+    //****************************************** Clear GUI Components Section ***************************************//
+    //***************************************************************************************************************//
+
+
+    private void clearAll() {
+        clearDropdowns();
+        clearSubCategories();
+        clearAttributes();
+        clearBusinessResults();
+
+    }
+
+    private void clearDropdowns() {
+        day_of_week = "N/A";
+        start_time = "N/A";
+        end_time = "N/A";
+
+        string_start_hours_of_day = new String[]{"N/A"};
+        string_end_hours_of_day = new String[]{"N/A"};
+        string_days_of_week = new String[]{"N/A"};
+
+        recreateDropDowns();
+    }
+
+    private void recreateDropDowns() {
+        drop_downs.get("day_of_week").setVisible(false);
+        pane.remove(drop_downs.get("day_of_week"));
+        drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
+
+        drop_downs.get("start_time").setVisible(false);
+        pane.remove(drop_downs.get("start_time"));
+        drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
+
+        drop_downs.get("end_time").setVisible(false);
+        pane.remove(drop_downs.get("end_time"));
+        drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
+    }
+
+    // Sub Categories
+    private void clearSubCategories() {
+        subcategory_set.clear();
+        sub_business_categories = new String[0];
+        recreateSubCategories();
+    }
+
+    private void recreateSubCategories() {
+        scroll_panes.get("sub_category").setVisible(false);
+        pane.remove(scroll_panes.get("sub_category"));
+        scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindAttributes));
+
+    }
+
+    // Attributes
+    private void clearAttributes() {
+        attributes_set.clear();
+        attributes = new String[0];
+        recreateAttributes();
+    }
+
+    private void recreateAttributes() {
+        scroll_panes.get("attributes").setVisible(false);
+        pane.remove(scroll_panes.get("attributes"));
+        scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
+    }
+
+
+    // Business Results
+    private void clearBusinessResults() {
+        data = new Object[0][0];
+        data_arraylist.clear();
+        data_ids.clear();
+        schedule.clear();
+
+        recreateBusinessResults();
+    }
+
+    private void recreateBusinessResults() {
+        scroll_panes.get("results").setVisible(false);
+        pane.remove(scroll_panes.get("results"));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
     }
 
 }
