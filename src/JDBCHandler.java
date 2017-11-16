@@ -112,6 +112,20 @@ public class JDBCHandler {
         return obj;
     }
 
+    public Object[][] arrayListToObjectArray(ArrayList<String[]> list, int start_index, int end_index){
+        if(list.size() == 0){
+            return new Object[0][0];
+        }
+        Object[][] obj = new Object[list.size()][list.get(0).length];
+        for(int i=0; i<list.size(); i++){
+            for (int j=start_index; j<=end_index; j++){
+                obj[i][j]= list.get(i)[j];
+            }
+        }
+        System.out.println(list.toString());
+        return obj;
+    }
+
     /**
      *
      * @param list

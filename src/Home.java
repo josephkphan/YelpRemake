@@ -165,8 +165,9 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createButtons() {
-        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 950, 500, 100, 25, queryFindBusiness));
-        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 1100, 500, 100, 25, r_close));
+        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 925, 500, 100, 25, queryFindBusiness));
+        buttons.put("reset", GeneralJStuff.createButton(pane, "Reset", 1050, 500, 100, 25, r_reset));
+        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 1175, 500, 100, 25, r_close));
     }
 
     /**
@@ -211,6 +212,12 @@ public class Home extends JFrame implements ActionListener {
         public void run() {
             jdbc_handler.closeConnection();
             System.exit(0);
+        }
+    };
+    Runnable r_reset = new Runnable() {
+        @Override
+        public void run() {
+            clearAll();
         }
     };
     // Creating Drop Downs
@@ -319,20 +326,20 @@ public class Home extends JFrame implements ActionListener {
                 }
 
                 search_query += time_check_string();
-
+                search_query += location_check_string();
 
                 // Querying Database
-                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, BUSINESS_COLUMN_COUNT);
+                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 22);
                 System.out.println(Arrays.toString(data));
 
-                data = jdbc_handler.arrayListToObjectArray(results);
+                data = jdbc_handler.arrayListToObjectArray(results,0,7);
                 System.out.println("Businesses Size: " + data.length);
                 recreateBusinessResults();
 
                 data_arraylist = results;
 
                 // Does it again to get business IDs (used as reference for Reviews)
-                results = jdbc_handler.makeSearchQuery(search_query, 22);
+//                results = jdbc_handler.makeSearchQuery(search_query, 22);
 
                 for (int i = 0; i < results.size(); i++) {
                     city_arraylist.add(results.get(i)[2]);
@@ -343,7 +350,11 @@ public class Home extends JFrame implements ActionListener {
                 System.out.println(data_ids.toString());
                 System.out.println("--------------------");
                 System.out.println(schedule.toString());
-                if (day_of_week.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0 && start_time.compareTo("N/A") == 0)
+                if (day_of_week.compareTo("N/A") == 0 &&
+                        start_time.compareTo("N/A") == 0 &&
+                        end_time.compareTo("N/A") == 0 &&
+                        city.compareTo("N/A") == 0 &&
+                        state.compareTo("N/A") == 0)
                     updateFilterDropDowns();
 
             }
@@ -647,6 +658,17 @@ public class Home extends JFrame implements ActionListener {
             filter = " AND  b." + day + "_open not like '%null%'";
         }
 
+        return filter;
+    }
+
+    private String location_check_string(){
+        String filter = "";
+        if(city.compareTo("N/A") != 0 ){
+            filter += " AND b.city=" + singleQuotes(city);
+        }
+        if(state.compareTo("N/A") != 0 ){
+            filter += " AND b.state=" + singleQuotes(state);
+        }
         return filter;
     }
 
