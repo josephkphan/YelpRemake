@@ -4,6 +4,7 @@ services:
     image: josephkphan/oracledb:latest
     volumes:
       - ~/oracle_db2/oradata:/opt/oracle/oradata # persistent oracle database data.
+    restart: always
     ports:
       - 1521:1521
       - 5500:5500
