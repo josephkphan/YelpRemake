@@ -89,7 +89,7 @@ public class GeneralJStuff {
     }
 
 
-    static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data, String[] data_ids,  int x, int y, int width, int height, StringBuilder id, StringBuilder name, Runnable r){
+    static JScrollPane createTableScrollPane(Container pane, String[] col_names, Object[][] data, int x, int y, int width, int height, StringBuilder id, StringBuilder name, Runnable r){
         JScrollPane component;
         JTable table = new JTable(data, col_names);
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
@@ -97,7 +97,7 @@ public class GeneralJStuff {
                 // do some actions here, for example
                 // print first column value from selected row
                 String business_name = table.getValueAt(table.getSelectedRow(), 0).toString();
-                String business_id = data_ids[table.getSelectedRow()];
+                String business_id = table.getValueAt(table.getSelectedRow(), 5).toString();
                 System.out.println(business_id);
                 id.setLength(0); // clear it out
                 id.append(business_id);

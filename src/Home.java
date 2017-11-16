@@ -84,7 +84,6 @@ public class Home extends JFrame implements ActionListener {
 
     Object[][] data = new Object[][]{};
     ArrayList<String[]> data_arraylist = new ArrayList<>();
-    ArrayList<String> data_ids = new ArrayList<>();
     ArrayList<String[]> schedule = new ArrayList<>();
     ArrayList<String> state_arraylist = new ArrayList<>();
     ArrayList<String> city_arraylist = new ArrayList<>();
@@ -190,7 +189,7 @@ public class Home extends JFrame implements ActionListener {
         scroll_panes.put("main_category", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 50, 50, 145, 400, main_category_set, queryFindTypes));
         scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindAttributes));
         scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
     }
 
 
@@ -344,10 +343,9 @@ public class Home extends JFrame implements ActionListener {
                 for (int i = 0; i < results.size(); i++) {
                     city_arraylist.add(results.get(i)[2]);
                     state_arraylist.add(results.get(i)[3]);
-                    data_ids.add(results.get(i)[5]);
                     schedule.add(Arrays.copyOfRange(results.get(i), 8, 23));
                 }
-                System.out.println(data_ids.toString());
+
                 System.out.println("--------------------");
                 System.out.println(schedule.toString());
                 if (day_of_week.compareTo("N/A") == 0 &&
@@ -769,7 +767,6 @@ public class Home extends JFrame implements ActionListener {
     private void clearBusinessResults() {
         data = new Object[0][0];
         data_arraylist.clear();
-        data_ids.clear();
         schedule.clear();
         city_arraylist.clear();
         state_arraylist.clear();
@@ -780,7 +777,7 @@ public class Home extends JFrame implements ActionListener {
     private void recreateBusinessResults() {
         scroll_panes.get("results").setVisible(false);
         pane.remove(scroll_panes.get("results"));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
     }
 }
 
