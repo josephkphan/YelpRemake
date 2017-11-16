@@ -19,7 +19,7 @@ public class Home extends JFrame implements ActionListener {
 
     JDBCHandler jdbc_handler;
 
-    private static final int WINDOW_WIDTH = 1000;
+    private static final int WINDOW_WIDTH = 1300;
     private static final int WINDOW_HEIGHT = 600;
 
     private static Container pane;
@@ -62,13 +62,11 @@ public class Home extends JFrame implements ActionListener {
      */
 
     private String[] string_days_of_week = {"N/A"};
-
     private String[] string_start_hours_of_day = {"N/A"};
-
     private String[] string_end_hours_of_day = {"N/A"};
-
+    private String[] string_state = {"N/A"};
+    private String[] string_city = {"N/A"};
     private String[] string_search_for = {"OR", "AND"};
-
     private String[] main_business_categories = {
             "Active Life", "Arts and Entertainment", "Automotive", "Car Rental", "Cafe",
             "Beauty and Spas", "Convenience Stores", "Dentists", "Doctors", "Drugstores",
@@ -79,18 +77,17 @@ public class Home extends JFrame implements ActionListener {
     };
 
     private String[] sub_business_categories = {};
-
     private String[] attributes = {};
+    private String[] result_columns = {"Business", "Address", "City", "State", "Stars", "ID", "# Reviews", "# Check Ins"};
 
-    private String[] result_columns = {"Business", "City", "State", "Stars"};
+    private final int BUSINESS_COLUMN_COUNT = 8;
 
     Object[][] data = new Object[][]{};
-
     ArrayList<String[]> data_arraylist = new ArrayList<>();
-
     ArrayList<String> data_ids = new ArrayList<>();
-
     ArrayList<String[]> schedule = new ArrayList<>();
+    ArrayList<String> state_arraylist = new ArrayList<>();
+    ArrayList<String> city_arraylist = new ArrayList<>();
 
 
     Object[][] reviews_data = new Object[][]{};
@@ -98,15 +95,16 @@ public class Home extends JFrame implements ActionListener {
 
     //These Variables are controlled by the GUI and will alter the final search results -- builder blocks for SQL query
     private Set<String> main_category_set = new HashSet<>();
-
     private Set<String> subcategory_set = new HashSet<>();
-
     private Set<String> attributes_set = new HashSet<>();
 
     private String day_of_week = "N/A";
     private String start_time = "N/A";
     private String end_time = "N/A";
+    private String state = "N/A";
+    private String city = "N/A";
     private String search_attribute = "OR";
+
     private StringBuilder business_id_requested = new StringBuilder();
     private StringBuilder review_business_name = new StringBuilder();
 
@@ -157,9 +155,9 @@ public class Home extends JFrame implements ActionListener {
         labels.put("day_of_week", GeneralJStuff.createLabel(pane, "Day of the Week", 50, 500));
         labels.put("start_time", GeneralJStuff.createLabel(pane, "From:", 200, 500));
         labels.put("end_time", GeneralJStuff.createLabel(pane, "To:", 350, 500));
-        labels.put("attributes", GeneralJStuff.createLabel(pane, "Attributes Condition", 500, 500));
-//        labels.put("attributes", GeneralJStuff.createLabel(pane, "State", 500, 500));
-//        labels.put("attributes", GeneralJStuff.createLabel(pane, "City", 500, 500));
+        labels.put("attributes", GeneralJStuff.createLabel(pane, "Attributes Cond", 500, 500));
+        labels.put("state", GeneralJStuff.createLabel(pane, "State", 650, 500));
+        labels.put("city", GeneralJStuff.createLabel(pane, "City", 800, 500));
 
     }
 
@@ -167,37 +165,20 @@ public class Home extends JFrame implements ActionListener {
      *
      */
     public void createButtons() {
-        Runnable r_search = new Runnable() {
-            @Override
-            public void run() {
-                queryFindBusiness.run();
-                scroll_panes.get("results").setVisible(false);
-                pane.remove(scroll_panes.get("results"));
-                scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
-                System.out.println("Businesses Size: " + data.length);
-            }
-        };
-        Runnable r_close = new Runnable() {
-            @Override
-            public void run() {
-                jdbc_handler.closeConnection();
-                System.exit(0);
-            }
-        };
-
-        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 700, 500, 100, 25, r_search));
-        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 850, 500, 100, 25, r_close));
+        buttons.put("search", GeneralJStuff.createButton(pane, "Search", 950, 500, 100, 25, queryFindBusiness));
+        buttons.put("close", GeneralJStuff.createButton(pane, "Close", 1100, 500, 100, 25, r_close));
     }
 
     /**
      *
      */
     public void createDropDowns() {
-
         drop_downs.put("day_of_week", GeneralJStuff.createDropDown(pane, string_days_of_week, 50, 500, 100, 100, r_day_of_week));
         drop_downs.put("start_time", GeneralJStuff.createDropDown(pane, string_start_hours_of_day, 200, 500, 100, 100, r_start_time));
         drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
         drop_downs.put("attributes", GeneralJStuff.createDropDown(pane, string_search_for, 500, 500, 100, 100, r_attributes));
+        drop_downs.put("state", GeneralJStuff.createDropDown(pane, string_state, 650, 500, 100, 100, r_state));
+        drop_downs.put("city", GeneralJStuff.createDropDown(pane, string_city, 800, 500, 100, 100, r_city));
 
     }
 
@@ -208,7 +189,7 @@ public class Home extends JFrame implements ActionListener {
         scroll_panes.put("main_category", GeneralJStuff.createCheckBoxScrollPane(pane, main_business_categories, 50, 50, 145, 400, main_category_set, queryFindTypes));
         scroll_panes.put("sub_category", GeneralJStuff.createCheckBoxScrollPane(pane, sub_business_categories, 200, 50, 145, 400, subcategory_set, queryFindAttributes));
         scroll_panes.put("attributes", GeneralJStuff.createCheckBoxScrollPane(pane, attributes, 350, 50, 145, 400, attributes_set, r_empty));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
     }
 
 
@@ -217,13 +198,21 @@ public class Home extends JFrame implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent e) {
-
-        //***************************************************************************************************************//
-        //**************************************** CREATING RUNNABLES FOR GUI Drop Downs ********************************//
-        //***************************************************************************************************************//
-
     }
 
+
+    //***************************************************************************************************************//
+    //**************************************** CREATING RUNNABLES FOR GUI Drop Downs ********************************//
+    //***************************************************************************************************************//
+
+
+    Runnable r_close = new Runnable() {
+        @Override
+        public void run() {
+            jdbc_handler.closeConnection();
+            System.exit(0);
+        }
+    };
     // Creating Drop Downs
     Runnable r_day_of_week = new Runnable() {
         @Override
@@ -232,7 +221,6 @@ public class Home extends JFrame implements ActionListener {
             day_of_week = drop_downs.get("day_of_week").getSelectedItem().toString();
         }
     };
-
     Runnable r_start_time = new Runnable() {
         @Override
         public void run() {
@@ -264,6 +252,20 @@ public class Home extends JFrame implements ActionListener {
 //            }
         }
     };
+    Runnable r_state = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("state").getSelectedItem());
+            state = drop_downs.get("state").getSelectedItem().toString();
+        }
+    };
+    Runnable r_city = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println(drop_downs.get("city").getSelectedItem());
+            city = drop_downs.get("city").getSelectedItem().toString();
+        }
+    };
 
 
     //***************************************************************************************************************//
@@ -281,13 +283,17 @@ public class Home extends JFrame implements ActionListener {
                 System.out.println("Nothing Selected!");
                 clearAll();
             } else {
-                String search_query = "SELECT DISTINCT b.name, b.city, b.state, b.review_count " +
-                        ", b.business_id, mon_open, mon_close, tue_open, tue_close, wed_open, wed_close " +
+
+                // reference private String[] result_columns = {"Business", "City", "State", "Address", "Stars", "ID", "# Reviews", "# Check Ins"};
+
+                String search_query = "SELECT DISTINCT b.name, b.full_address, b.city,  b.state, b.stars, b.business_id, b.review_count " +
+                        ",ci.total, mon_open, mon_close, tue_open, tue_close, wed_open, wed_close " +
                         ", thu_open, thu_close, fri_open, fri_close, sat_open, sat_close, sun_open, sun_close " +
                         "FROM Business b " +
                         "INNER JOIN MainCategories mc ON b.business_id=mc.business_id " +
                         "INNER JOIN SubCategories sc ON b.business_id=sc.business_id " +
-                        "INNER JOIN Attributes a ON b.business_id=a.business_id ";
+                        "INNER JOIN Attributes a ON b.business_id=a.business_id " +
+                        "INNER JOIN CheckIn ci ON b.business_id=ci.business_id ";
 
                 //if(main_category_set.size() != 0){
                 search_query += "WHERE ";
@@ -314,21 +320,25 @@ public class Home extends JFrame implements ActionListener {
 
                 search_query += time_check_string();
 
+
                 // Querying Database
-                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 4);
+                ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, BUSINESS_COLUMN_COUNT);
                 System.out.println(Arrays.toString(data));
+
                 data = jdbc_handler.arrayListToObjectArray(results);
-                data_arraylist.clear();
+                System.out.println("Businesses Size: " + data.length);
+                recreateBusinessResults();
+
                 data_arraylist = results;
 
                 // Does it again to get business IDs (used as reference for Reviews)
-                results = jdbc_handler.makeSearchQuery(search_query, 19);
+                results = jdbc_handler.makeSearchQuery(search_query, 22);
 
-                data_ids.clear();
-                schedule.clear();
                 for (int i = 0; i < results.size(); i++) {
-                    data_ids.add(results.get(i)[4]);
-                    schedule.add(Arrays.copyOfRange(results.get(i), 5, 20));
+                    city_arraylist.add(results.get(i)[2]);
+                    state_arraylist.add(results.get(i)[3]);
+                    data_ids.add(results.get(i)[5]);
+                    schedule.add(Arrays.copyOfRange(results.get(i), 8, 23));
                 }
                 System.out.println(data_ids.toString());
                 System.out.println("--------------------");
@@ -445,7 +455,7 @@ public class Home extends JFrame implements ActionListener {
                 String search_query = "SELECT r.date_string, r.stars, r.text, r.user_id, r.v_useful " +
                         "FROM Business b " +
                         "INNER JOIN Review r ON b.business_id=r.business_id " +
-                        "WHERE  r.business_id=" + addQuotes(business_id_requested.toString());
+                        "WHERE  r.business_id=" + singleQuotes(business_id_requested.toString());
 
                 ArrayList<String[]> results = jdbc_handler.makeSearchQuery(search_query, 5);
                 Object[][] obj_results = jdbc_handler.arrayListToObjectArray(results);
@@ -469,7 +479,7 @@ public class Home extends JFrame implements ActionListener {
         int counter = 0;
         for (String str : main_category_set) {
             string += " mc.category=";
-            string += addQuotes(str);
+            string += singleQuotes(str);
             if (counter++ != main_category_set.size() - 1) {
                 string += " " + search_attribute + " ";
             }
@@ -482,7 +492,7 @@ public class Home extends JFrame implements ActionListener {
         int counter = 0;
         for (String str : subcategory_set) {
             string += " sc.category=";
-            string += addQuotes(str);
+            string += singleQuotes(str);
             if (counter++ != subcategory_set.size() - 1) {
                 string += " " + search_attribute + " ";
             }
@@ -495,7 +505,7 @@ public class Home extends JFrame implements ActionListener {
         String string = "";
         for (String str : attributes_set) {
             string += " a.attribute=";
-            string += addQuotes(str);
+            string += singleQuotes(str);
             if (counter++ != attributes_set.size() - 1) {
                 string += " " + search_attribute + " ";
             }
@@ -507,6 +517,9 @@ public class Home extends JFrame implements ActionListener {
         Set<String> days_found = new HashSet<>();
         Set<String> start_times_found = new HashSet<>();
         Set<String> end_times_found = new HashSet<>();
+        Set<String> cities_found = new HashSet<>();
+        Set<String> states_found = new HashSet<>();
+
         for (String[] arr : schedule) {
             if (arr[0].compareTo("null") != 0) {
                 days_found.add("Monday");
@@ -548,24 +561,46 @@ public class Home extends JFrame implements ActionListener {
                 }
             }
 
-
         }
+        cities_found.addAll(city_arraylist);
+        states_found.addAll(state_arraylist);
+
+        System.out.println("!!!!!!!!!");
+        System.out.println(cities_found);
+        System.out.println(states_found);
+
         ArrayList<String> list_days_of_week = new ArrayList<>();
         ArrayList<String> list_start_hours_of_day = new ArrayList<>();
         ArrayList<String> list_end_hours_of_day = new ArrayList<>();
+        ArrayList<String> list_cities = new ArrayList<>();
+        ArrayList<String> list_states = new ArrayList<>();
+
 
         list_days_of_week.addAll(days_found);
+        Collections.sort(list_days_of_week);
         list_days_of_week.add(0, "N/A");
 
         list_start_hours_of_day.addAll(start_times_found);
+        Collections.sort(list_start_hours_of_day);
         list_start_hours_of_day.add(0, "N/A");
 
         list_end_hours_of_day.addAll(end_times_found);
+        Collections.sort(list_end_hours_of_day);
         list_end_hours_of_day.add(0, "N/A");
+
+        list_cities.addAll(cities_found);
+        Collections.sort(list_cities);
+        list_cities.add(0, "N/A");
+
+        list_states.addAll(states_found);
+        Collections.sort(list_states);
+        list_states.add(0, "N/A");
 
         string_days_of_week = list_days_of_week.toArray(new String[list_days_of_week.size()]);
         string_start_hours_of_day = list_start_hours_of_day.toArray(new String[list_start_hours_of_day.size()]);
         string_end_hours_of_day = list_end_hours_of_day.toArray(new String[list_end_hours_of_day.size()]);
+        string_city = list_cities.toArray(new String[list_cities.size()]);
+        string_state = list_states.toArray(new String[list_states.size()]);
 
         recreateDropDowns();
     }
@@ -624,17 +659,6 @@ public class Home extends JFrame implements ActionListener {
         return "'" + s + "'";
     }
 
-    private String addQuotes(String s) {
-        return "'" + (s) + "'";
-    }
-
-    private int timeToIntConverstion(String s) {
-        s = s.replaceAll(":", "");
-        s = s.replaceAll("AM", "");
-        s = s.replaceAll("PM", "");
-        return Integer.parseInt(s);
-    }
-
     private String[] convertStringArrayListToArray(ArrayList<String> al) {
         String[] arr = new String[al.size()];
         return al.toArray(arr);
@@ -657,10 +681,14 @@ public class Home extends JFrame implements ActionListener {
         day_of_week = "N/A";
         start_time = "N/A";
         end_time = "N/A";
+        city = "N/A";
+        state = "N/A";
 
         string_start_hours_of_day = new String[]{"N/A"};
         string_end_hours_of_day = new String[]{"N/A"};
         string_days_of_week = new String[]{"N/A"};
+        string_city = new String[]{"N/A"};
+        string_state = new String[]{"N/A"};
 
         recreateDropDowns();
     }
@@ -677,6 +705,14 @@ public class Home extends JFrame implements ActionListener {
         drop_downs.get("end_time").setVisible(false);
         pane.remove(drop_downs.get("end_time"));
         drop_downs.put("end_time", GeneralJStuff.createDropDown(pane, string_end_hours_of_day, 350, 500, 100, 100, r_end_time));
+
+        drop_downs.get("state").setVisible(false);
+        pane.remove(drop_downs.get("state"));
+        drop_downs.put("state", GeneralJStuff.createDropDown(pane, string_state, 650, 500, 100, 100, r_state));
+
+        drop_downs.get("city").setVisible(false);
+        pane.remove(drop_downs.get("city"));
+        drop_downs.put("city", GeneralJStuff.createDropDown(pane, string_city, 800, 500, 100, 100, r_city));
     }
 
     // Sub Categories
@@ -713,6 +749,8 @@ public class Home extends JFrame implements ActionListener {
         data_arraylist.clear();
         data_ids.clear();
         schedule.clear();
+        city_arraylist.clear();
+        state_arraylist.clear();
 
         recreateBusinessResults();
     }
@@ -720,7 +758,7 @@ public class Home extends JFrame implements ActionListener {
     private void recreateBusinessResults() {
         scroll_panes.get("results").setVisible(false);
         pane.remove(scroll_panes.get("results"));
-        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 450, 400, business_id_requested, review_business_name, createReviews));
+        scroll_panes.put("results", GeneralJStuff.createTableScrollPane(pane, result_columns, data, convertStringArrayListToArray(data_ids), 500, 50, 750, 400, business_id_requested, review_business_name, createReviews));
     }
-
 }
+
