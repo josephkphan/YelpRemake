@@ -436,7 +436,7 @@ public class Home extends JFrame implements ActionListener {
 
             } else if (main_category_set.size() != 0) {
                 attributes_set.clear();
-                String search_query = "SELECT DISTINCT(att.attribute)so FROM Attributes att JOIN ";
+                String search_query = "SELECT DISTINCT(att.attribute) FROM Attributes att JOIN ";
                 search_query +=
                         "( SELECT b.business_id as b_id, mc.category as mc_category, sc.category as sc_category " +
                                 "FROM Business b " +
