@@ -1,3 +1,5 @@
+import com.sun.org.apache.bcel.internal.generic.ARRAYLENGTH;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -134,6 +136,10 @@ public class Home extends JFrame implements ActionListener {
         buttons = new HashMap<>();
         scroll_panes = new HashMap<>();
 
+        String main_category_query = "SELECT DISTINCT(category) FROM MainCategories";
+        ArrayList<String[]> temp = jdbc_handler.makeSearchQuery(main_category_query,1);
+        main_business_categories = jdbc_handler.arrayListToStringArray(temp);
+        Arrays.sort(main_business_categories);
         createLabels();
         createButtons();
         createDropDowns();
@@ -317,12 +323,28 @@ public class Home extends JFrame implements ActionListener {
                     search_query += ")";
                 }
 
-                // Adding Attributes Where Conditions
-                if (attributes_set.size() > 0) {
-                    search_query += " AND (";
-                    search_query += createAttributesString();
-                    search_query += ")";
+                if (search_attribute.compareTo("OR")==0){
+                    // Adding Attributes Where Conditions
+                    if (attributes_set.size() > 0) {
+                        search_query += " AND (";
+                        search_query += createAttributesString();
+                        search_query += ")";
+                    }
+                }else{
+                    int counter = 0;
+                    String and_string = "INNER JOIN (";
+                    for (String s: attributes_set){
+                        and_string+= ("(SELECT att.business_id as b_id from Attributes att WHERE att.attribute=" + singleQuotes(s) + ")");
+                        if (counter++ != attributes_set.size() - 1) {
+                            and_string += " INTERSECT";
+                        }
+                    }
+                    and_string += ") and_query on and_query.b_id=b.business_id ";
+                    search_query=search_query.replaceAll("INNER JOIN Attributes a ON b.business_id=a.business_id",and_string);
                 }
+
+
+
 
                 search_query += time_check_string();
                 search_query += location_check_string();
